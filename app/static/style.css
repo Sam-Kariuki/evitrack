@@ -42,3 +42,16 @@ footer {
   font-size: 0.85rem;
   margin: 3rem 0 1rem;
 }
+.badge { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 4px; font-size: 0.8rem; }
+.badge.open { background: #d8f3dc; color: #1b4332; }
+.badge.closed { background: #e9ecef; color: #495057; }
+.actions { display: flex; gap: 0.75rem; align-items: center; margin: 1rem 0; }
+.actions form { margin: 0; }
+a.button, button.button {
+  background: #1f2d3d; color: #fff; padding: 0.5rem 0.9rem; border: none;
+  border-radius: 4px; text-decoration: none; cursor: pointer; font: inherit;
+}
+form.stack { max-width: 560px; display: grid; gap: 0.5rem; }
+form.stack input, form.stack textarea { padding: 0.5rem; font: inherit; }
+.meta { color: #555; font-size: 0.9rem; }
+.desc { white-space: pre-wrap; }

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Case {{ case['id'] }} - EviTrack{% endblock %}
+{% block content %}
+  <h1>{{ case['title'] }}</h1>
+  <p class="meta">
+    Case #{{ case['id'] }} &middot;
+    <span class="badge {{ case['status'] }}">{{ case['status'] }}</span> &middot;
+    Owner: {{ case['owner'] }} &middot; Created (UTC): {{ case['created_at'] }}
+  </p>
+  <p class="desc">{{ case['description'] or 'No description.' }}</p>
+
+  <div class="actions">
+    {% if case['status'] == 'open' %}
+      <a class="button" href="{{ url_for('cases.edit', case_id=case['id']) }}">Edit</a>
+      <form method="post" action="{{ url_for('cases.set_status', case_id=case['id']) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="status" value="closed">
+        <button type="submit" class="button">Close case</button>
+      </form>
+    {% elif g.user['role'] == 'admin' %}
+      <form method="post" action="{{ url_for('cases.set_status', case_id=case['id']) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="status" value="open">
+        <button type="submit" class="button">Reopen case</button>
+      </form>
+    {% endif %}
+    <a href="{{ url_for('cases.index') }}">Back to cases</a>
+  </div>
+
+  <h2>Evidence</h2>
+  <p>Evidence upload is added in Step 5.</p>
+{% endblock %}

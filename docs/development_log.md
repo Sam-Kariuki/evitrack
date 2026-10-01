@@ -32,3 +32,18 @@ Day 2, application foundation.
 - Admin users screenshot
 - Forbidden access (403) screenshot
 - Password hash verification screenshot
+
+## Day 4: Case management
+**Goal:** Create, view, edit and close cases with access control.
+**Done:**
+- Case routes: list, new, detail, edit, open/close
+- Ownership check on every case route; admins can see all cases
+- Closed cases are read-only (enforced server-side); only admins can reopen
+- Input validation (title 3-120, description max 2000)
+- 14 new tests (access control, validation, XSS escaping, SQL injection payload)
+**Decisions:** return 404 (not 403) for other users' cases to prevent
+case ID enumeration; all timestamps stored and shown in UTC.
+**Limitations:** case-level actions are not yet in the custody log, which
+is evidence-level; a separate audit log could be added as a stretch.
+**Problems / lessons:** (note anything)
+**Next:** Day 5, evidence upload and SHA-256 hashing.

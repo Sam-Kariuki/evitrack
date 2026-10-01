@@ -32,10 +32,11 @@ def create_app(test_config=None):
 
     csrf.init_app(app)
 
-    from . import admin, auth, db
+    from . import admin, auth, cases, db
     db.init_app(app)
     app.register_blueprint(auth.bp)
     app.register_blueprint(admin.bp)
+    app.register_blueprint(cases.bp)
     app.cli.add_command(auth.create_admin_command)
 
     @app.route("/")
@@ -45,5 +46,9 @@ def create_app(test_config=None):
     @app.errorhandler(403)
     def forbidden(e):
         return render_template("403.html"), 403
+
+    @app.errorhandler(404)
+    def not_found(e):
+        return render_template("404.html"), 404
 
     return app

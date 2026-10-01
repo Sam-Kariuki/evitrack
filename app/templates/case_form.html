@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit case' if case else 'New case' }} - EviTrack{% endblock %}
+{% block content %}
+  <h1>{{ 'Edit case' if case else 'New case' }}</h1>
+  <form method="post" class="stack">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="title">Title</label>
+    <input name="title" id="title" required minlength="3" maxlength="120"
+           value="{{ values['title'] }}">
+    <label for="description">Description</label>
+    <textarea name="description" id="description" rows="6"
+              maxlength="2000">{{ values['description'] }}</textarea>
+    <button type="submit" class="button">Save</button>
+  </form>
+{% endblock %}
