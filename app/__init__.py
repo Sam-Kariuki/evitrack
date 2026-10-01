@@ -2,8 +2,11 @@ import os
 
 from dotenv import load_dotenv
 from flask import Flask, render_template
+from flask_wtf.csrf import CSRFProtect
 
 load_dotenv()
+
+csrf = CSRFProtect()
 
 
 def create_app(test_config=None):
@@ -17,6 +20,8 @@ def create_app(test_config=None):
             "UPLOAD_FOLDER", os.path.join(app.instance_path, "uploads")
         ),
         MAX_CONTENT_LENGTH=int(os.environ.get("MAX_UPLOAD_MB", "10")) * 1024 * 1024,
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE="Lax",
     )
 
     if test_config:
@@ -25,11 +30,20 @@ def create_app(test_config=None):
     os.makedirs(app.instance_path, exist_ok=True)
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-    from . import db
+    csrf.init_app(app)
+
+    from . import admin, auth, db
     db.init_app(app)
+    app.register_blueprint(auth.bp)
+    app.register_blueprint(admin.bp)
+    app.cli.add_command(auth.create_admin_command)
 
     @app.route("/")
     def index():
         return render_template("index.html")
+
+    @app.errorhandler(403)
+    def forbidden(e):
+        return render_template("403.html"), 403
 
     return app

@@ -20,3 +20,15 @@
 
 **Next:**
 Day 2, application foundation.
+**Security notes:**
+- Passwords are stored using Werkzeug's secure password hashing.
+- Role-based access control restricts administrative functions.
+- Unauthorized access attempts return HTTP 403 responses.
+- All timestamps are stored in UTC using SQLite CURRENT_TIMESTAMP and will be labelled as UTC in the interface and reports.
+
+**Evidence collected:**
+- Admin login screenshot
+- Investigator login screenshot
+- Admin users screenshot
+- Forbidden access (403) screenshot
+- Password hash verification screenshot

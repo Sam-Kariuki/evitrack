@@ -3,12 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
   <title>{% block title %}EviTrack{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <nav>
     <a href="{{ url_for('index') }}" class="brand">EviTrack</a>
+    <span class="spacer"></span>
+    {% if g.user %}
+      <span class="who">{{ g.user['username'] }} ({{ g.user['role'] }})</span>
+      {% if g.user['role'] == 'admin' %}
+        <a href="{{ url_for('admin.users') }}">Users</a>
+      {% endif %}
+      <form method="post" action="{{ url_for('auth.logout') }}" class="inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="linklike">Log out</button>
+      </form>
+    {% else %}
+      <a href="{{ url_for('auth.login') }}">Log in</a>
+      <a href="{{ url_for('auth.register') }}">Register</a>
+    {% endif %}
   </nav>
   <main>
     {% with messages = get_flashed_messages() %}
