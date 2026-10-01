@@ -8,10 +8,11 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <nav>
+    <nav>
     <a href="{{ url_for('index') }}" class="brand">EviTrack</a>
     <span class="spacer"></span>
     {% if g.user %}
+      <a href="{{ url_for('cases.index') }}">Cases</a>
       <span class="who">{{ g.user['username'] }} ({{ g.user['role'] }})</span>
       {% if g.user['role'] == 'admin' %}
         <a href="{{ url_for('admin.users') }}">Users</a>
