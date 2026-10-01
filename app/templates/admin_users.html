@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Users - EviTrack{% endblock %}
+{% block content %}
+  <h1>Users</h1>
+  <table>
+    <thead><tr><th>ID</th><th>Username</th><th>Role</th><th>Created</th></tr></thead>
+    <tbody>
+      {% for u in users %}
+        <tr>
+          <td>{{ u['id'] }}</td><td>{{ u['username'] }}</td>
+          <td>{{ u['role'] }}</td><td>{{ u['created_at'] }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
