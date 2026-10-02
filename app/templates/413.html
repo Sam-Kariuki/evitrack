@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}File too large - EviTrack{% endblock %}
+{% block content %}
+  <h1>413: File too large</h1>
+  <p>The file you tried to upload exceeds the maximum allowed size.</p>
+  <p><a href="{{ url_for('cases.index') }}">Back to cases</a></p>
+{% endblock %}

@@ -18,3 +18,6 @@
 | 12 | Insecure direct object reference (viewing or editing another user's case) | Cases | Ownership check on every route; 404 instead of 403 | Done |
 | 13 | Stored XSS via case title or description | Users' browsers | Jinja autoescaping, no `|safe`; tested | Done |
 | 14 | Altering a closed case | Case integrity | Server-side status check on edit; only admins can reopen | Done |
+| 15 | Path traversal via file name | Server filesystem | secure_filename, random stored names, paths built server-side | Done |
+| 16 | Oversized upload / disk exhaustion | Availability | MAX_CONTENT_LENGTH with 413 handler | Done (no per-user quota) |
+| 17 | Executable or script upload | Server, other users | Extension allowlist; stored without extension; never served or executed | Done (no content inspection) |

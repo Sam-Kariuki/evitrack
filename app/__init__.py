@@ -32,11 +32,12 @@ def create_app(test_config=None):
 
     csrf.init_app(app)
 
-    from . import admin, auth, cases, db
+    from . import admin, auth, cases, db, evidence
     db.init_app(app)
     app.register_blueprint(auth.bp)
     app.register_blueprint(admin.bp)
     app.register_blueprint(cases.bp)
+    app.register_blueprint(evidence.bp)
     app.cli.add_command(auth.create_admin_command)
 
     @app.route("/")
@@ -50,5 +51,9 @@ def create_app(test_config=None):
     @app.errorhandler(404)
     def not_found(e):
         return render_template("404.html"), 404
+
+    @app.errorhandler(413)
+    def too_large(e):
+        return render_template("413.html"), 413
 
     return app

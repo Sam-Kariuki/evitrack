@@ -47,3 +47,19 @@ case ID enumeration; all timestamps stored and shown in UTC.
 is evidence-level; a separate audit log could be added as a stretch.
 **Problems / lessons:** (note anything)
 **Next:** Day 5, evidence upload and SHA-256 hashing.
+
+## Day 5: Evidence upload and SHA-256 hashing
+**Goal:** Accept evidence files and record an integrity hash.
+**Done:**
+- Streaming upload (64 KB chunks) hashed with SHA-256 in a single pass
+- Files stored with random names, no extension, in instance/uploads
+- Extension allowlist, size limit, 413 error page, empty-file check
+- Evidence table on the case page; upload blocked on closed cases
+- 16 new tests, including the published SHA-256 vector for "abc"
+- Manual check: app hash matches PowerShell Get-FileHash
+**Decisions:** hash computed server-side from the stored bytes; DB row written
+only after the file is safely on disk; no edit or delete routes for evidence.
+**Limitations:** allowlist checks extensions not content; file size not stored;
+no download route; uploads before Step 6 have no custody entries.
+**Problems / lessons:** (note anything)
+**Next:** Day 6, custody logging.
