@@ -133,3 +133,10 @@ def test_evidence_listed_on_case_page(case_client):
     page = case_client.get("/cases/1")
     assert b"notes.txt" in page.data
     assert ABC_SHA256.encode() in page.data
+
+def test_413_page_keeps_logged_in_nav(case_client, app):
+    app.config["WTF_CSRF_ENABLED"] = True
+    app.config["MAX_CONTENT_LENGTH"] = 1024
+    resp = upload(case_client, data=b"x" * 4096)
+    assert resp.status_code == 413
+    assert b"Log out" in resp.data 
