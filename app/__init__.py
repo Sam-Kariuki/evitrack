@@ -54,6 +54,9 @@ def create_app(test_config=None):
 
     @app.errorhandler(413)
     def too_large(e):
+        # CSRF protection reads the request body before the user is loaded,
+        # so load the user here to keep the navigation bar correct.
+        auth.load_logged_in_user()
         return render_template("413.html"), 413
 
     return app
