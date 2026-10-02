@@ -28,5 +28,27 @@
   </div>
 
   <h2>Evidence</h2>
-  <p>Evidence upload is added in Step 5.</p>
+  {% if case['status'] == 'open' %}
+    <p><a class="button" href="{{ url_for('evidence.upload', case_id=case['id']) }}">Upload evidence</a></p>
+  {% endif %}
+  {% if evidence %}
+    <table>
+      <thead>
+        <tr><th>ID</th><th>File</th><th>SHA-256</th><th>Uploaded by</th><th>Uploaded (UTC)</th></tr>
+      </thead>
+      <tbody>
+        {% for e in evidence %}
+          <tr>
+            <td>{{ e['id'] }}</td>
+            <td>{{ e['original_name'] }}</td>
+            <td><code class="hash">{{ e['sha256'] }}</code></td>
+            <td>{{ e['uploader'] }}</td>
+            <td>{{ e['uploaded_at'] }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No evidence uploaded yet.</p>
+  {% endif %}
 {% endblock %}

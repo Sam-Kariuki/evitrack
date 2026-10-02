@@ -55,3 +55,5 @@ form.stack { max-width: 560px; display: grid; gap: 0.5rem; }
 form.stack input, form.stack textarea { padding: 0.5rem; font: inherit; }
 .meta { color: #555; font-size: 0.9rem; }
 .desc { white-space: pre-wrap; }
+code.hash { font-size: 0.75rem; word-break: break-all; }
+.upload-note { color: #555; font-size: 0.9rem; }
