@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Evidence {{ item['id'] }} - EviTrack{% endblock %}
+{% block content %}
+  <h1>{{ item['original_name'] }}</h1>
+  <p class="meta">
+    Evidence #{{ item['id'] }} &middot;
+    Case #{{ case['id'] }}:
+    <a href="{{ url_for('cases.detail', case_id=case['id']) }}">{{ case['title'] }}</a>
+    &middot; Uploaded by {{ item['uploader'] }}
+    &middot; Uploaded (UTC): {{ item['uploaded_at'] }}
+  </p>
+
+  <h2>SHA-256 at upload</h2>
+  <p><code class="hash">{{ item['sha256'] }}</code></p>
+
+  <h2>Chain of custody</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>Time (UTC)</th><th>User</th>
+        <th>Action</th><th>Notes</th><th>Entry hash</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for h in history %}
+        <tr>
+          <td>{{ h['id'] }}</td>
+          <td>{{ h['timestamp'] }}</td>
+          <td>{{ h['username'] }}</td>
+          <td>{{ h['action'] }}</td>
+          <td>{{ h['notes'] or '' }}</td>
+          <td><code class="hash" title="{{ h['entry_hash'] }}">{{ h['entry_hash'][:16] }}&hellip;</code></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="meta">Each entry's hash covers its own fields plus the previous entry's hash. Every time this page is opened, a VIEWED entry is added.</p>
+
+  <p><a href="{{ url_for('cases.detail', case_id=case['id']) }}">Back to case</a></p>
+{% endblock %}

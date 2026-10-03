@@ -40,7 +40,7 @@
         {% for e in evidence %}
           <tr>
             <td>{{ e['id'] }}</td>
-            <td>{{ e['original_name'] }}</td>
+            <td><a href="{{url_for('evidence.detail', case_id=case['id'], evidence_id=e['id'])}}">{{ e['original_name'] }}</a></td>
             <td><code class="hash">{{ e['sha256'] }}</code></td>
             <td>{{ e['uploader'] }}</td>
             <td>{{ e['uploaded_at'] }}</td>

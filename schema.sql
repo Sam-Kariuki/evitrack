@@ -37,3 +37,14 @@ CREATE TABLE IF NOT EXISTS custody_log (
     prev_hash TEXT,
     entry_hash TEXT
 );
+CREATE TRIGGER IF NOT EXISTS custody_log_no_update
+BEFORE UPDATE ON custody_log
+BEGIN
+    SELECT RAISE(ABORT, 'custody_log is append-only');
+END;
+
+CREATE TRIGGER IF NOT EXISTS custody_log_no_delete
+BEFORE DELETE ON custody_log
+BEGIN
+    SELECT RAISE(ABORT, 'custody_log is append-only');
+END;
