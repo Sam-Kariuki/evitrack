@@ -1,15 +1,35 @@
 import os
 
-from flask import (Blueprint, current_app, flash, g, redirect,
+from flask import (Blueprint, abort, current_app, flash, g, redirect,
                    render_template, request, url_for)
 from werkzeug.utils import secure_filename
 
 from .auth import login_required
 from .cases import get_case_or_404
+from .custody import log_action
 from .db import get_db
 from .utils import ALLOWED_EXTENSIONS, allowed_file, save_upload
 
 bp = Blueprint("evidence", __name__, url_prefix="/cases")
+
+
+def get_evidence_or_404(case_id, evidence_id):
+    """Return (case, evidence), or 404.
+
+    get_case_or_404 enforces case ownership. The extra case_id condition stops
+    someone using a case they own to reach evidence from another case.
+    """
+    case = get_case_or_404(case_id)
+    item = get_db().execute(
+        "SELECT e.id, e.case_id, e.original_name, e.sha256, e.uploaded_at, "
+        "u.username AS uploader "
+        "FROM evidence e JOIN users u ON u.id = e.uploaded_by "
+        "WHERE e.id = ? AND e.case_id = ?",
+        (evidence_id, case_id),
+    ).fetchone()
+    if item is None:
+        abort(404)
+    return case, item
 
 
 @bp.route("/<int:case_id>/evidence/upload", methods=("GET", "POST"))
@@ -43,14 +63,20 @@ def upload(case_id):
             else:
                 db = get_db()
                 try:
-                    db.execute(
+                    cur = db.execute(
                         "INSERT INTO evidence "
                         "(case_id, original_name, stored_name, sha256, uploaded_by) "
                         "VALUES (?, ?, ?, ?, ?)",
                         (case_id, original_name, stored_name, digest, g.user["id"]),
                     )
+                    log_action(
+                        db, cur.lastrowid, g.user["id"], "UPLOADED",
+                        f"File '{original_name}' uploaded ({size} bytes). "
+                        f"SHA-256: {digest}",
+                    )
                     db.commit()
                 except Exception:
+                    db.rollback()
                     os.remove(os.path.join(folder, stored_name))
                     raise
                 flash("Evidence uploaded and SHA-256 hash recorded.")
@@ -64,4 +90,25 @@ def upload(case_id):
         case=case,
         allowed=sorted(ALLOWED_EXTENSIONS),
         max_mb=max_mb,
+    )
+
+
+@bp.route("/<int:case_id>/evidence/<int:evidence_id>")
+@login_required
+def detail(case_id, evidence_id):
+    case, item = get_evidence_or_404(case_id, evidence_id)
+
+    db = get_db()
+    log_action(db, evidence_id, g.user["id"], "VIEWED")
+    db.commit()
+
+    history = db.execute(
+        "SELECT c.id, c.timestamp, c.action, c.notes, c.entry_hash, "
+        "u.username "
+        "FROM custody_log c JOIN users u ON u.id = c.user_id "
+        "WHERE c.evidence_id = ? ORDER BY c.id",
+        (evidence_id,),
+    ).fetchall()
+    return render_template(
+        "evidence_detail.html", case=case, item=item, history=history
     )
