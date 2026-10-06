@@ -40,3 +40,26 @@ def log_action(db, evidence_id, user_id, action, notes=None):
         (evidence_id, user_id, action, notes, timestamp, prev_hash, entry_hash),
     )
     return entry_hash
+
+def verify_chain(db):
+    """Walk the whole log in order and check every link and every hash.
+
+    Returns (ok, broken_entry_id, message).
+    """
+    rows = db.execute(
+        "SELECT id, evidence_id, user_id, action, notes, timestamp, "
+        "prev_hash, entry_hash FROM custody_log ORDER BY id"
+    ).fetchall()
+
+    expected_prev = GENESIS_HASH
+    for r in rows:
+        if r["prev_hash"] != expected_prev:
+            return False, r["id"], f"Entry {r['id']}: link to the previous entry is broken."
+        recomputed = compute_entry_hash(
+            r["prev_hash"], r["evidence_id"], r["user_id"],
+            r["action"], r["notes"], r["timestamp"],
+        )
+        if recomputed != r["entry_hash"]:
+            return False, r["id"], f"Entry {r['id']}: contents do not match its recorded hash."
+        expected_prev = r["entry_hash"]
+    return True, None, f"All {len(rows)} entries verified."
