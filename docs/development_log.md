@@ -84,4 +84,4 @@ no download route; uploads before Step 6 have no custody entries.
 - A regression test was accidentally pasted into `app/custody.py` instead of the test file. It was spotted in `git diff` before committing and reverted.
 
 **Screenshots**
-`Step7_HashPass.png`, `Step7_Downloaded.png`, `Step7_ChainIntact.png`, `Step7_CheckFail.png`, `Step7_DownloadBlocked.png`, `Step7_FailLogged.png`, `Step7_Verify400.png`
+`Step7_HashPass.png`, `Step7_Downloaded.png`, `Step7_ChainIntact.png`, `Step7_CheckFail.png`, `Step7_DownloadBlocked.png`, `Step7_FailedLog.png`, `Step7_Verify400.png`
