@@ -63,3 +63,25 @@ only after the file is safely on disk; no edit or delete routes for evidence.
 no download route; uploads before Step 6 have no custody entries.
 **Problems / lessons:** (note anything)
 **Next:** Day 6, custody logging.
+
+## Step 7: Integrity verification and chain verification (issues #7, #10)
+
+**Built**
+- Download route that rehashes the stored file before serving it and logs `DOWNLOADED`.
+- "Verify integrity" action that rehashes the stored file, compares it with the SHA-256 recorded at upload, and logs `HASH_VERIFIED` with PASS or FAIL.
+- `verify_chain()` walks the whole custody log, rechecks every link and every entry hash, and the evidence page shows "Chain intact" or "CHAIN BROKEN".
+- 13 new tests (71 in total).
+
+**Design decisions**
+- A download is blocked if the stored file no longer matches its recorded hash. Serving a modified file as evidence would be worse than refusing. The blocked attempt is logged.
+- A failed check does not alter the log. The log records the failure, so the chain stays intact while the file is flagged.
+- Each action is followed by a `VIEWED` row because the redirect back to the evidence page counts as a view.
+
+**Problems / lessons**
+- The first test run had 5 failures because `stored_name` was missing from the SELECT in `get_evidence_or_404`.
+- The chain status test failed because the new template content had been placed after `{% endblock %}`, where child templates ignore it.
+- The verify form returned a 400 "CSRF token is missing" in the browser (`Step7_Verify400.png`). The unit tests didn't catch it because CSRF is disabled in the test config. It was found by manual testing, fixed by adding the token to the form, and a regression test now checks that the form includes it.
+- A regression test was accidentally pasted into `app/custody.py` instead of the test file. It was spotted in `git diff` before committing and reverted.
+
+**Screenshots**
+`Step7_HashPass.png`, `Step7_Downloaded.png`, `Step7_ChainIntact.png`, `Step7_CheckFail.png`, `Step7_DownloadBlocked.png`, `Step7_FailLogged.png`, `Step7_Verify400.png`
