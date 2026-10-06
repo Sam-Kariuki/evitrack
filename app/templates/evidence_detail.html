@@ -20,6 +20,7 @@
   </p>
   <form method="post"
         action="{{ url_for('evidence.verify', case_id=case['id'], evidence_id=item['id']) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <button type="submit">Verify integrity</button>
   </form>
 

@@ -257,3 +257,8 @@ def test_detail_page_shows_chain_status(case_client):
     upload(case_client)
     resp = case_client.get("/cases/1/evidence/1")
     assert b"Chain intact" in resp.data
+
+def test_verify_form_includes_csrf_token(case_client):
+    upload(case_client)
+    resp = case_client.get("/cases/1/evidence/1")
+    assert b'name="csrf_token"' in resp.data
