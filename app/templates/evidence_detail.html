@@ -13,7 +13,23 @@
   <h2>SHA-256 at upload</h2>
   <p><code class="hash">{{ item['sha256'] }}</code></p>
 
+  <h2>Actions</h2>
+  <p>
+    <a href="{{ url_for('evidence.download', case_id=case['id'], evidence_id=item['id']) }}">Download</a>
+    (the file's hash is checked first, and the download is blocked if it no longer matches)
+  </p>
+  <form method="post"
+        action="{{ url_for('evidence.verify', case_id=case['id'], evidence_id=item['id']) }}">
+    <button type="submit">Verify integrity</button>
+  </form>
+
   <h2>Chain of custody</h2>
+  {% if chain_ok %}
+    <p class="meta">Chain intact: {{ chain_message }}</p>
+  {% else %}
+    <p><strong>CHAIN BROKEN:</strong> {{ chain_message }}</p>
+  {% endif %}
+
   <table>
     <thead>
       <tr>

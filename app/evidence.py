@@ -1,14 +1,15 @@
 import os
 
 from flask import (Blueprint, abort, current_app, flash, g, redirect,
-                   render_template, request, url_for)
+                   render_template, request, send_file, url_for)
 from werkzeug.utils import secure_filename
 
 from .auth import login_required
 from .cases import get_case_or_404
-from .custody import log_action
+from .custody import log_action, verify_chain
 from .db import get_db
-from .utils import ALLOWED_EXTENSIONS, allowed_file, save_upload
+from .utils import (ALLOWED_EXTENSIONS, allowed_file, save_upload,
+                    sha256_of_file)
 
 bp = Blueprint("evidence", __name__, url_prefix="/cases")
 
@@ -21,8 +22,8 @@ def get_evidence_or_404(case_id, evidence_id):
     """
     case = get_case_or_404(case_id)
     item = get_db().execute(
-        "SELECT e.id, e.case_id, e.original_name, e.sha256, e.uploaded_at, "
-        "u.username AS uploader "
+        "SELECT e.id, e.case_id, e.original_name, e.stored_name, e.sha256, "
+        "e.uploaded_at, u.username AS uploader "
         "FROM evidence e JOIN users u ON u.id = e.uploaded_by "
         "WHERE e.id = ? AND e.case_id = ?",
         (evidence_id, case_id),
@@ -30,6 +31,29 @@ def get_evidence_or_404(case_id, evidence_id):
     if item is None:
         abort(404)
     return case, item
+
+
+def stored_path(item):
+    """Absolute path of the stored file for an evidence row."""
+    return os.path.abspath(
+        os.path.join(current_app.config["UPLOAD_FOLDER"], item["stored_name"])
+    )
+
+
+def check_integrity(item):
+    """Rehash the stored file and compare it with the hash recorded at upload.
+
+    Returns (ok, message).
+    """
+    path = stored_path(item)
+    if not os.path.isfile(path):
+        return False, "stored file is missing"
+    actual = sha256_of_file(path)
+    if actual != item["sha256"]:
+        return False, (
+            f"hash mismatch (recorded {item['sha256']}, computed {actual})"
+        )
+    return True, f"hash matches recorded SHA-256 {actual}"
 
 
 @bp.route("/<int:case_id>/evidence/upload", methods=("GET", "POST"))
@@ -109,6 +133,63 @@ def detail(case_id, evidence_id):
         "WHERE c.evidence_id = ? ORDER BY c.id",
         (evidence_id,),
     ).fetchall()
+    chain_ok, chain_broken_id, chain_message = verify_chain(db)
     return render_template(
-        "evidence_detail.html", case=case, item=item, history=history
+        "evidence_detail.html",
+        case=case,
+        item=item,
+        history=history,
+        chain_ok=chain_ok,
+        chain_broken_id=chain_broken_id,
+        chain_message=chain_message,
+    )
+
+
+@bp.route("/<int:case_id>/evidence/<int:evidence_id>/verify", methods=("POST",))
+@login_required
+def verify(case_id, evidence_id):
+    case, item = get_evidence_or_404(case_id, evidence_id)
+    ok, message = check_integrity(item)
+    db = get_db()
+    log_action(
+        db, evidence_id, g.user["id"], "HASH_VERIFIED",
+        f"{'PASS' if ok else 'FAIL'}: {message}",
+    )
+    db.commit()
+    if ok:
+        flash("Integrity check passed.")
+    else:
+        flash("INTEGRITY CHECK FAILED: " + message)
+    return redirect(
+        url_for("evidence.detail", case_id=case_id, evidence_id=evidence_id)
+    )
+
+
+@bp.route("/<int:case_id>/evidence/<int:evidence_id>/download")
+@login_required
+def download(case_id, evidence_id):
+    case, item = get_evidence_or_404(case_id, evidence_id)
+    ok, message = check_integrity(item)
+    db = get_db()
+    if not ok:
+        log_action(
+            db, evidence_id, g.user["id"], "HASH_VERIFIED",
+            f"FAIL: {message}. Download blocked.",
+        )
+        db.commit()
+        flash("Integrity check failed, so the download was blocked. "
+              "The event was logged.")
+        return redirect(
+            url_for("evidence.detail", case_id=case_id, evidence_id=evidence_id)
+        )
+
+    log_action(
+        db, evidence_id, g.user["id"], "DOWNLOADED",
+        f"Integrity verified before download. SHA-256: {item['sha256']}",
+    )
+    db.commit()
+    return send_file(
+        stored_path(item),
+        as_attachment=True,
+        download_name=item["original_name"],
     )
