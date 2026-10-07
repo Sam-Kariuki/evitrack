@@ -44,7 +44,7 @@ All timestamps are stored in UTC to ensure forensic consistency and auditability
 - Evidence upload with server-side SHA-256 hashing. Files are stored under random names outside the web root, with an extension allowlist and a size limit (default 10 MB, set via `MAX_UPLOAD_MB`).
 - Chain of custody: every upload and every view of evidence is recorded automatically with user, UTC time and a hash linking each entry to the previous one. The log is append-only (enforced by database triggers).
 
-## Day 6: Custody logging
+##: Custody logging
 **Goal:** Record every access to evidence in a tamper-evident chain of custody.
 **Done:**
 - app/custody.py: log_action and compute_entry_hash (SHA-256 over canonical JSON of all fields plus the previous hash)
