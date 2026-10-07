@@ -57,3 +57,17 @@ form.stack input, form.stack textarea { padding: 0.5rem; font: inherit; }
 .desc { white-space: pre-wrap; }
 code.hash { font-size: 0.75rem; word-break: break-all; }
 .upload-note { color: #555; font-size: 0.9rem; }
+.result-pass { color: #1a7f37; font-weight: bold; }
+.result-fail { color: #b42318; font-weight: bold; }
+.report .hash { word-break: break-all; }
+.report table { width: 100%; }
+.report th, .report td { overflow-wrap: anywhere; vertical-align: top; }
+
+@page { size: A4 landscape; margin: 10mm; }
+@media print { .report table { font-size: 8pt; } }
+
+@media print {
+  nav, footer, .flash, .no-print { display: none; }
+  body { background: #fff; }
+  .report tr { page-break-inside: avoid; }
+}

@@ -24,6 +24,7 @@
         <button type="submit" class="button">Reopen case</button>
       </form>
     {% endif %}
+    <a class="button" href="{{ url_for('evidence.case_report', case_id=case['id']) }}">Case report</a>
     <a href="{{ url_for('cases.index') }}">Back to cases</a>
   </div>
 

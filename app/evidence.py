@@ -4,6 +4,7 @@ from flask import (Blueprint, abort, current_app, flash, g, redirect,
                    render_template, request, send_file, url_for)
 from werkzeug.utils import secure_filename
 
+from datetime import datetime, timezone
 from .auth import login_required
 from .cases import get_case_or_404
 from .custody import log_action, verify_chain
@@ -192,4 +193,57 @@ def download(case_id, evidence_id):
         stored_path(item),
         as_attachment=True,
         download_name=item["original_name"],
+    )
+
+@bp.route("/<int:case_id>/report")
+@login_required
+def case_report(case_id):
+    case = get_case_or_404(case_id)
+    db = get_db()
+
+    items = db.execute(
+        "SELECT e.id, e.original_name, e.stored_name, e.sha256, "
+        "e.uploaded_at, u.username AS uploader "
+        "FROM evidence e JOIN users u ON u.id = e.uploaded_by "
+        "WHERE e.case_id = ? ORDER BY e.id",
+        (case_id,),
+    ).fetchall()
+
+    # Rehash every file for this report. Each check is logged, so the report
+    # itself leaves a trace in the custody chain.
+    results = []
+    for item in items:
+        ok, message = check_integrity(item)
+        log_action(
+            db, item["id"], g.user["id"], "HASH_VERIFIED",
+            f"Case report: {'PASS' if ok else 'FAIL'}: {message}",
+        )
+        results.append({"item": item, "ok": ok, "message": message})
+    db.commit()
+
+    history = db.execute(
+        "SELECT c.id, c.timestamp, c.action, c.notes, c.entry_hash, "
+        "u.username, e.original_name "
+        "FROM custody_log c "
+        "JOIN users u ON u.id = c.user_id "
+        "JOIN evidence e ON e.id = c.evidence_id "
+        "WHERE e.case_id = ? ORDER BY c.id",
+        (case_id,),
+    ).fetchall()
+
+    chain_ok, chain_broken_id, chain_message = verify_chain(db)
+    head = db.execute(
+        "SELECT id, entry_hash FROM custody_log ORDER BY id DESC LIMIT 1"
+    ).fetchone()
+    generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+
+    return render_template(
+        "case_report.html",
+        case=case,
+        results=results,
+        history=history,
+        chain_ok=chain_ok,
+        chain_message=chain_message,
+        head=head,
+        generated=generated,
     )

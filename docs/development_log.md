@@ -85,3 +85,25 @@ no download route; uploads before Step 6 have no custody entries.
 
 **Screenshots**
 `Step7_HashPass.png`, `Step7_Downloaded.png`, `Step7_ChainIntact.png`, `Step7_CheckFail.png`, `Step7_DownloadBlocked.png`, `Step7_FailedLog.png`, `Step7_Verify400.png`
+
+## Step 8: Case report export (issue #8)
+
+**Built**
+- `GET /cases/<id>/report` (login required, same ownership check as the case page; other investigators get a 404).
+- The report shows the case details and generation time, every evidence item with its recorded SHA-256 and a live integrity result (PASS or FAIL with the reason), the full custody log for the case, the chain status from `verify_chain()`, and the latest log entry number and hash.
+- Print stylesheet (navigation hidden, landscape) so the browser's "Save as PDF" produces the report with no PDF library.
+- 9 new tests (80 in total).
+
+**Design decisions**
+- Every file is rehashed when the report is generated, so the report states the files' current integrity rather than repeating the stored hash.
+- Each integrity check made for a report is logged as `HASH_VERIFIED` with a "Case report:" prefix (entries 28 to 31 in the exported report), so producing a report leaves a trace in the custody chain.
+- The latest entry hash is printed on the report. Deleting the newest log entries cannot be detected from inside the database, but it can be detected by comparing against a printed copy.
+- A case-level "report generated" entry is not possible, because `custody_log.evidence_id` is required. The per-file entries record the event instead.
+- The report route lives in `app/evidence.py` so it reuses `check_integrity()` without a circular import with `cases.py`.
+
+**Problems / lessons**
+- The first exported PDF was missing the Entry hash column. Unbreakable 64-character hashes inside the Notes cells forced the table wider than the page, and the last column was cut off. Fixed with `overflow-wrap: anywhere` and landscape printing. The tests could not catch this because it only appears in print output, so it was found by reading the exported PDF.
+- `demo-notes.txt` was uploaded before custody logging existed, so its history has no UPLOADED entry. This is demo data; a fresh deployment starts with an empty database.
+
+**Evidence**
+`Step8_CaseReport.pdf` is the exported report for case 1. It shows PASS results for untouched files, a FAIL with the recorded and computed hashes for the deliberately tampered file, the full custody log, "Chain intact" and the latest entry hash. It replaces separate screenshots for this step.
