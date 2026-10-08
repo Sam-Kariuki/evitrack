@@ -1,15 +1,65 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Edit case' if case else 'New case' }} - EviTrack{% endblock %}
+
+{% block title %}
+  {{ 'Edit case' if case else 'New case' }} - EviTrack
+{% endblock %}
+
 {% block content %}
-  <h1>{{ 'Edit case' if case else 'New case' }}</h1>
-  <form method="post" class="stack">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label for="title">Title</label>
-    <input name="title" id="title" required minlength="3" maxlength="120"
-           value="{{ values['title'] }}">
-    <label for="description">Description</label>
-    <textarea name="description" id="description" rows="6"
-              maxlength="2000">{{ values['description'] }}</textarea>
-    <button type="submit" class="button">Save</button>
-  </form>
+
+<div class="page-header">
+  <div>
+    <h1>{{ 'Edit case' if case else 'New case' }}</h1>
+    <p class="subtitle">
+      {{ 'Update case information.' if case else 'Create a new evidence case.' }}
+    </p>
+  </div>
+</div>
+
+<form method="post" class="card stack">
+
+  <input
+    type="hidden"
+    name="csrf_token"
+    value="{{ csrf_token() }}"
+  >
+
+  <label for="title">Case title</label>
+
+  <input
+    name="title"
+    id="title"
+    required
+    minlength="3"
+    maxlength="120"
+    value="{{ values['title'] }}"
+  >
+
+  <label for="description">Description</label>
+
+  <textarea
+    name="description"
+    id="description"
+    rows="7"
+    maxlength="2000"
+  >{{ values['description'] }}</textarea>
+
+  <p class="form-help">
+    Provide a clear description of the investigation or incident.
+  </p>
+
+  <div class="actions">
+    <button type="submit" class="button">
+      Save case
+    </button>
+
+    <a
+      class="button button-secondary"
+      href="{{ url_for('cases.index') }}"
+    >
+      Cancel
+    </a>
+  </div>
+
+</form>
+
 {% endblock %}

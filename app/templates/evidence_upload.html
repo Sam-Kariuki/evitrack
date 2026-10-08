@@ -1,19 +1,70 @@
 {% extends "base.html" %}
+
 {% block title %}Upload evidence - EviTrack{% endblock %}
+
 {% block content %}
-  <h1>Upload evidence</h1>
-  <p class="meta">Case #{{ case['id'] }}: {{ case['title'] }}</p>
-  <form method="post" enctype="multipart/form-data" class="stack">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label for="file">Evidence file</label>
-    <input type="file" name="file" id="file" required>
-    <p class="upload-note">
-      Allowed types: {{ allowed | join(', ') }}. Maximum size: {{ max_mb }} MB.
-      A SHA-256 hash is calculated and stored on upload. Demo data only.
+
+<div class="page-header">
+  <div>
+    <h1>Upload evidence</h1>
+
+    <p class="subtitle">
+      Case #{{ case['id'] }}:
+      {{ case['title'] }}
     </p>
-    <div class="actions">
-      <button type="submit" class="button">Upload and hash</button>
-      <a href="{{ url_for('cases.detail', case_id=case['id']) }}">Cancel</a>
-    </div>
-  </form>
+  </div>
+</div>
+
+<form
+  method="post"
+  enctype="multipart/form-data"
+  class="card stack"
+>
+
+  <input
+    type="hidden"
+    name="csrf_token"
+    value="{{ csrf_token() }}"
+  >
+
+  <label for="file">Evidence file</label>
+
+  <input
+    type="file"
+    name="file"
+    id="file"
+    required
+  >
+
+  <div class="upload-note">
+    <strong>Upload requirements</strong>
+    <br>
+    Allowed types:
+    {{ allowed | join(', ') }}.
+    Maximum size:
+    {{ max_mb }} MB.
+  </div>
+
+  <p class="upload-note">
+    A SHA-256 cryptographic hash is calculated and stored
+    when the evidence is uploaded.
+  </p>
+
+  <div class="actions">
+
+    <button type="submit" class="button">
+      Upload and hash
+    </button>
+
+    <a
+      href="{{ url_for('cases.detail', case_id=case['id']) }}"
+      class="button button-secondary"
+    >
+      Cancel
+    </a>
+
+  </div>
+
+</form>
+
 {% endblock %}

@@ -1,58 +1,118 @@
 {% extends "base.html" %}
+
 {% block title %}Case {{ case['id'] }} - EviTrack{% endblock %}
+
 {% block content %}
-  <h1>{{ case['title'] }}</h1>
-  <p class="meta">
-    Case #{{ case['id'] }} &middot;
-    <span class="badge {{ case['status'] }}">{{ case['status'] }}</span> &middot;
-    Owner: {{ case['owner'] }} &middot; Created (UTC): {{ case['created_at'] }}
-  </p>
-  <p class="desc">{{ case['description'] or 'No description.' }}</p>
 
-  <div class="actions">
-    {% if case['status'] == 'open' %}
-      <a class="button" href="{{ url_for('cases.edit', case_id=case['id']) }}">Edit</a>
-      <form method="post" action="{{ url_for('cases.set_status', case_id=case['id']) }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="status" value="closed">
-        <button type="submit" class="button">Close case</button>
-      </form>
-    {% elif g.user['role'] == 'admin' %}
-      <form method="post" action="{{ url_for('cases.set_status', case_id=case['id']) }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="status" value="open">
-        <button type="submit" class="button">Reopen case</button>
-      </form>
-    {% endif %}
-    <form method="post" action="{{ url_for('evidence.case_report', case_id=case['id']) }}">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <button type="submit" class="button">Case report</button>
-    </form>
-    <a href="{{ url_for('cases.index') }}">Back to cases</a>
+<div class="page-header">
+  <div>
+    <h1>{{ case['title'] }}</h1>
+
+    <p class="meta">
+      Case #{{ case['id'] }} &middot;
+      <span class="badge {{ case['status'] }}">{{ case['status'] }}</span>
+      &middot;
+      Owner: {{ case['owner'] }}
+      &middot;
+      Created (UTC): {{ case['created_at'] }}
+    </p>
   </div>
+</div>
 
-  <h2>Evidence</h2>
+<p class="desc">{{ case['description'] or 'No description.' }}</p>
+
+<div class="actions">
   {% if case['status'] == 'open' %}
-    <p><a class="button" href="{{ url_for('evidence.upload', case_id=case['id']) }}">Upload evidence</a></p>
+    <a class="button" href="{{ url_for('cases.edit', case_id=case['id']) }}">
+      Edit
+    </a>
+
+    <form method="post"
+          action="{{ url_for('cases.set_status', case_id=case['id']) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="status" value="closed">
+      <button type="submit" class="button">Close case</button>
+    </form>
+
+  {% elif g.user['role'] == 'admin' %}
+    <form method="post"
+          action="{{ url_for('cases.set_status', case_id=case['id']) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="status" value="open">
+      <button type="submit" class="button">Reopen case</button>
+    </form>
   {% endif %}
-  {% if evidence %}
+
+  <form method="post"
+        action="{{ url_for('evidence.case_report', case_id=case['id']) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="button">Case report</button>
+  </form>
+
+  <a href="{{ url_for('cases.index') }}">Back to cases</a>
+</div>
+
+<h2>Evidence</h2>
+
+{% if case['status'] == 'open' %}
+  <p>
+    <a class="button"
+       href="{{ url_for('evidence.upload', case_id=case['id']) }}">
+      Upload evidence
+    </a>
+  </p>
+{% endif %}
+
+{% if evidence %}
+  <div class="table-wrap">
     <table>
       <thead>
-        <tr><th>ID</th><th>File</th><th>SHA-256</th><th>Uploaded by</th><th>Uploaded (UTC)</th></tr>
+        <tr>
+          <th>ID</th>
+          <th>File</th>
+          <th>SHA-256</th>
+          <th>Uploaded by</th>
+          <th>Uploaded (UTC)</th>
+        </tr>
       </thead>
+
       <tbody>
         {% for e in evidence %}
           <tr>
             <td>{{ e['id'] }}</td>
-            <td><a href="{{url_for('evidence.detail', case_id=case['id'], evidence_id=e['id'])}}">{{ e['original_name'] }}</a></td>
-            <td><code class="hash">{{ e['sha256'] }}</code></td>
+            <td>
+              <a href="{{ url_for(
+                'evidence.detail',
+                case_id=case['id'],
+                evidence_id=e['id']
+              ) }}">
+                {{ e['original_name'] }}
+              </a>
+            </td>
+            <td>
+              <code class="hash">{{ e['sha256'] }}</code>
+            </td>
             <td>{{ e['uploader'] }}</td>
             <td>{{ e['uploaded_at'] }}</td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
+  </div>
+{% else %}
+  <p>No evidence uploaded yet.</p>
+{% endif %}
+
+<h2>Chain of custody</h2>
+
+<div class="integrity-status {% if not chain_ok %}broken{% endif %}">
+  {% if chain_ok %}
+    <strong class="result-pass">Chain intact</strong>
+    <span>{{ chain_message }}</span>
   {% else %}
-    <p>No evidence uploaded yet.</p>
+    <strong class="result-fail">CHAIN BROKEN</strong>
+    <span>{{ chain_message }}</span>
   {% endif %}
+</div>
+
 {% endblock %}

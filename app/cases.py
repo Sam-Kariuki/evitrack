@@ -2,6 +2,7 @@ from flask import (Blueprint, abort, flash, g, redirect, render_template,
                    request, url_for)
 
 from .auth import login_required
+from .custody import verify_chain
 from .db import get_db
 
 bp = Blueprint("cases", __name__, url_prefix="/cases")
@@ -78,14 +79,27 @@ def new():
 @login_required
 def detail(case_id):
     case = get_case_or_404(case_id)
-    evidence = get_db().execute(
+
+    db = get_db()
+
+    evidence = db.execute(
         "SELECT e.id, e.original_name, e.sha256, e.uploaded_at, "
         "u.username AS uploader "
         "FROM evidence e JOIN users u ON u.id = e.uploaded_by "
         "WHERE e.case_id = ? ORDER BY e.id",
         (case_id,),
     ).fetchall()
-    return render_template("case_detail.html", case=case, evidence=evidence)
+
+    chain_ok, chain_broken_id, chain_message = verify_chain(db)
+
+    return render_template(
+        "case_detail.html",
+        case=case,
+        evidence=evidence,
+        chain_ok=chain_ok,
+        chain_broken_id=chain_broken_id,
+        chain_message=chain_message,
+    )
 
 
 @bp.route("/<int:case_id>/edit", methods=("GET", "POST"))

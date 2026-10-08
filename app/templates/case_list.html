@@ -1,26 +1,70 @@
 {% extends "base.html" %}
+
 {% block title %}Cases - EviTrack{% endblock %}
+
 {% block content %}
-  <h1>Cases</h1>
-  <p><a class="button" href="{{ url_for('cases.new') }}">New case</a></p>
-  {% if cases %}
-    <table>
-      <thead>
-        <tr><th>ID</th><th>Title</th><th>Status</th><th>Owner</th><th>Created (UTC)</th></tr>
-      </thead>
-      <tbody>
-        {% for c in cases %}
-          <tr>
-            <td>{{ c['id'] }}</td>
-            <td><a href="{{ url_for('cases.detail', case_id=c['id']) }}">{{ c['title'] }}</a></td>
-            <td><span class="badge {{ c['status'] }}">{{ c['status'] }}</span></td>
-            <td>{{ c['owner'] }}</td>
-            <td>{{ c['created_at'] }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>No cases yet.</p>
-  {% endif %}
+
+<div class="page-header">
+  <div>
+    <h1>Cases</h1>
+    <p class="subtitle">Manage investigations and associated digital evidence.</p>
+  </div>
+
+  <a class="button" href="{{ url_for('cases.new') }}">
+    New case
+  </a>
+</div>
+
+{% if cases %}
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Owner</th>
+        <th>Created (UTC)</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for c in cases %}
+      <tr>
+        <td>{{ c['id'] }}</td>
+
+        <td>
+          <a href="{{ url_for('cases.detail', case_id=c['id']) }}">
+            <strong>{{ c['title'] }}</strong>
+          </a>
+        </td>
+
+        <td>
+          <span class="badge {{ c['status'] }}">
+            {{ c['status'] }}
+          </span>
+        </td>
+
+        <td>{{ c['owner'] }}</td>
+        <td>{{ c['created_at'] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% else %}
+
+<div class="empty-state">
+  <strong>No cases yet.</strong>
+  <p>Create your first case to begin managing digital evidence.</p>
+
+  <a class="button" href="{{ url_for('cases.new') }}">
+    Create case
+  </a>
+</div>
+
+{% endif %}
+
 {% endblock %}
