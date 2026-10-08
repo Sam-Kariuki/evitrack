@@ -195,7 +195,7 @@ def download(case_id, evidence_id):
         download_name=item["original_name"],
     )
 
-@bp.route("/<int:case_id>/report")
+@bp.route("/<int:case_id>/report", methods=("POST",))
 @login_required
 def case_report(case_id):
     case = get_case_or_404(case_id)

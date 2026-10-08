@@ -24,7 +24,10 @@
         <button type="submit" class="button">Reopen case</button>
       </form>
     {% endif %}
-    <a class="button" href="{{ url_for('evidence.case_report', case_id=case['id']) }}">Case report</a>
+    <form method="post" action="{{ url_for('evidence.case_report', case_id=case['id']) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="button">Case report</button>
+    </form>
     <a href="{{ url_for('cases.index') }}">Back to cases</a>
   </div>
 
