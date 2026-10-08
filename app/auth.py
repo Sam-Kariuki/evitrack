@@ -8,11 +8,16 @@ from flask import (Blueprint, abort, flash, g, redirect, render_template,
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .db import get_db
+from .lockout import clear_failed_logins, is_locked_out, record_failed_login
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 USERNAME_RE = re.compile(r"^[A-Za-z0-9_]{3,30}$")
 MIN_PASSWORD_LENGTH = 10
+
+# Checked when the username does not exist, so a failed login takes about the
+# same time whether or not the account is real.
+DUMMY_HASH = generate_password_hash("not-a-real-password")
 
 
 @bp.before_app_request
@@ -89,16 +94,32 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip().lower()
         password = request.form.get("password", "")
+        db = get_db()
 
-        user = get_db().execute(
+        # Checked before the password, so a correct guess made during a
+        # lockout is refused too.
+        if is_locked_out(db, username):
+            flash("Too many failed login attempts. Please try again in a few minutes.")
+            return render_template("login.html"), 429
+
+        user = db.execute(
             "SELECT * FROM users WHERE username = ?", (username,)
         ).fetchone()
 
-        if user is None or not check_password_hash(user["password_hash"], password):
+        if user is None:
+            check_password_hash(DUMMY_HASH, password)
+            valid = False
+        else:
+            valid = check_password_hash(user["password_hash"], password)
+
+        if not valid:
+            record_failed_login(db, username, request.remote_addr)
             flash("Invalid username or password.")
         else:
+            clear_failed_logins(db, username)
             session.clear()
             session["user_id"] = user["id"]
+            session.permanent = True
             return redirect(url_for("index"))
     return render_template("login.html")
 
@@ -117,7 +138,9 @@ def create_admin_command(username, password):
     """Create an administrator account."""
     username = username.strip().lower()
     if not USERNAME_RE.match(username) or len(password) < MIN_PASSWORD_LENGTH:
-        raise click.ClickException("Invalid username, or password too short Paswoord more than 10 characters.")
+        raise click.ClickException(
+            f"Invalid username, or password shorter than {MIN_PASSWORD_LENGTH} characters."
+        )
     db = get_db()
     try:
         db.execute(

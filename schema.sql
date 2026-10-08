@@ -48,3 +48,11 @@ BEFORE DELETE ON custody_log
 BEGIN
     SELECT RAISE(ABORT, 'custody_log is append-only');
 END;
+CREATE TABLE IF NOT EXISTS login_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    ip TEXT,
+    attempted_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_login_attempts_user_time
+    ON login_attempts (username, attempted_at);

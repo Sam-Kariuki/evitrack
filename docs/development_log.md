@@ -107,3 +107,28 @@ no download route; uploads before Step 6 have no custody entries.
 
 **Evidence**
 `Step8_CaseReport.pdf` is the exported report for case 1. It shows PASS results for untouched files, a FAIL with the recorded and computed hashes for the deliberately tampered file, the full custody log, "Chain intact" and the latest entry hash. It replaces separate screenshots for this step.
+## Step 9: Security hardening (issue #9)
+
+**Built**
+- Database-backed login lockout (`login_attempts` table, `app/lockout.py`): 5 failures per username in 10 minutes blocks further attempts with HTTP 429, including correct passwords; unknown usernames are throttled identically; success clears the count; records older than 24 hours are purged.
+- Dummy password hash for unknown usernames so failed logins take similar time.
+- Startup check: the app refuses to run with the default or an empty `SECRET_KEY` outside debug and testing mode.
+- Session lifetime (8 hours), `Secure` cookie flag and HSTS controlled by `SESSION_COOKIE_SECURE`.
+- Security headers on every response (CSP, nosniff, frame denial, referrer policy, permissions policy) and `Cache-Control: no-store` for logged-in pages and evidence downloads.
+- Custom 500 page with no technical details.
+- Case report generation changed from GET to POST.
+- Tests: lockout, secret key, session cookie flags, headers, 500 handling, and a CSRF coverage test that checks every POST route rejects a request without a token.
+
+**Design decisions**
+- Lockout is stored in the database rather than in memory, so it survives restarts and needs no extra dependency.
+- The lockout counts attempts per username, not per IP, so it works behind a proxy and cannot be dodged by rotating addresses. The cost is that someone can lock out a known username (threat 31).
+- `Referrer-Policy: same-origin` rather than `no-referrer`, because Flask-WTF checks the Referer header on HTTPS form posts.
+- The CSRF coverage test loops over the app's URL map, so any POST route added later is checked without anyone remembering to write a test. This closes the gap that let the verify form ship without a token.
+
+**Problems / lessons**
+- The startup key check also affects `flask init-db` and `flask create-admin`, so a real `SECRET_KEY` has to be in `.env`.
+- Report generation was a GET that wrote to the custody log (threat 26), so it became a POST. A refresh now asks to resubmit and writes new log entries.
+- DevTools showed a Content-Security-Policy with extra Kaspersky hosts on HTML pages. The antivirus on the development machine rewrites the header in the browser; the static file response and the app's own output (`Step9_HeadersRaw.png`) show the real policy. Lesson: verify security headers with a non-browser client as well as DevTools.
+
+**Screenshots**
+`Step9_Lockout.png`, `Step9_Headers.png`
