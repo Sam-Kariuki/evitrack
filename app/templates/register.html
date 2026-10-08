@@ -1,18 +1,67 @@
 {% extends "base.html" %}
+
 {% block title %}Register - EviTrack{% endblock %}
+
 {% block content %}
-  <h1>Create account</h1>
-  <form method="post" class="card">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label for="username">Username</label>
-    <input name="username" id="username" required autocomplete="username"
-           pattern="[A-Za-z0-9_]{3,30}" title="3-30 letters, numbers or underscores">
-    <label for="password">Password (min 10 characters)</label>
-    <input type="password" name="password" id="password" required minlength="10"
-           autocomplete="new-password">
-    <label for="confirm">Confirm password</label>
-    <input type="password" name="confirm" id="confirm" required minlength="10"
-           autocomplete="new-password">
-    <button type="submit">Register</button>
-  </form>
+
+<div class="page-header">
+  <div>
+    <h1>Create account</h1>
+    <p class="subtitle">
+      Create an account to access EviTrack.
+    </p>
+  </div>
+</div>
+
+<form method="post" class="card">
+
+  <input
+    type="hidden"
+    name="csrf_token"
+    value="{{ csrf_token() }}"
+  >
+
+  <label for="username">Username</label>
+
+  <input
+    name="username"
+    id="username"
+    required
+    autocomplete="username"
+    pattern="[A-Za-z0-9_]{3,30}"
+    title="3-30 letters, numbers or underscores"
+  >
+
+  <label for="password">
+    Password
+  </label>
+
+  <input
+    type="password"
+    name="password"
+    id="password"
+    required
+    minlength="10"
+    autocomplete="new-password"
+  >
+
+  <p class="form-help">
+    Password must contain at least 10 characters.
+  </p>
+
+  <label for="confirm">Confirm password</label>
+
+  <input
+    type="password"
+    name="confirm"
+    id="confirm"
+    required
+    minlength="10"
+    autocomplete="new-password"
+  >
+
+  <button type="submit">Register</button>
+
+</form>
+
 {% endblock %}

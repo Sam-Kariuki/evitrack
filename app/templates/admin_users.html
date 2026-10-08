@@ -1,16 +1,48 @@
 {% extends "base.html" %}
+
 {% block title %}Users - EviTrack{% endblock %}
+
 {% block content %}
-  <h1>Users</h1>
+
+<div class="page-header">
+  <div>
+    <h1>Users</h1>
+    <p class="subtitle">
+      Manage registered EviTrack accounts and roles.
+    </p>
+  </div>
+</div>
+
+<div class="table-wrap">
+
   <table>
-    <thead><tr><th>ID</th><th>Username</th><th>Role</th><th>Created</th></tr></thead>
+
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Role</th>
+        <th>Created</th>
+      </tr>
+    </thead>
+
     <tbody>
+
       {% for u in users %}
-        <tr>
-          <td>{{ u['id'] }}</td><td>{{ u['username'] }}</td>
-          <td>{{ u['role'] }}</td><td>{{ u['created_at'] }}</td>
-        </tr>
+
+      <tr>
+        <td>{{ u['id'] }}</td>
+        <td><strong>{{ u['username'] }}</strong></td>
+        <td>{{ u['role'] }}</td>
+        <td>{{ u['created_at'] }}</td>
+      </tr>
+
       {% endfor %}
+
     </tbody>
+
   </table>
+
+</div>
+
 {% endblock %}

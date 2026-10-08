@@ -1,106 +1,277 @@
 {% extends "base.html" %}
-{% block title %}Report: case {{ case['id'] }} - EviTrack{% endblock %}
+
+{% block title %}
+  Report: case {{ case['id'] }} - EviTrack
+{% endblock %}
+
 {% block content %}
+
 <div class="report">
-  <h1>Case report: {{ case['title'] }}</h1>
-  <p class="meta">
-    Case #{{ case['id'] }} &middot;
-    Status: {{ case['status'] }} &middot;
-    Owner: {{ case['owner'] }} &middot;
-    Created (UTC): {{ case['created_at'] }}
-  </p>
-  <p class="meta">
-    Report generated (UTC): {{ generated }} by {{ g.user['username'] }}
-  </p>
-  <p class="no-print meta">
-    To save this report as a PDF, use your browser's print function (Ctrl+P)
-    and choose "Save as PDF". &middot;
-    <a href="{{ url_for('cases.detail', case_id=case['id']) }}">Back to case</a>
-  </p>
+
+  <div class="page-header">
+    <div>
+      <h1>Case Report</h1>
+
+      <p class="subtitle">
+        {{ case['title'] }}
+      </p>
+    </div>
+  </div>
+
+  <div class="content-card">
+
+    <h2>Case Information</h2>
+
+    <p class="meta">
+      Case #{{ case['id'] }} &middot;
+      Status:
+      <span class="badge {{ case['status'] }}">
+        {{ case['status'] }}
+      </span>
+      &middot;
+      Owner: {{ case['owner'] }}
+      &middot;
+      Created (UTC): {{ case['created_at'] }}
+    </p>
+
+    <p class="meta">
+      Report generated (UTC):
+      {{ generated }}
+      by {{ g.user['username'] }}
+    </p>
+
+    <p class="no-print meta">
+      To save this report as a PDF, use your browser's print function
+      (Ctrl+P) and choose "Save as PDF".
+      &middot;
+      <a href="{{ url_for('cases.detail', case_id=case['id']) }}">
+        Back to case
+      </a>
+    </p>
+
+  </div>
+
 
   <h2>Description</h2>
-  <p>{{ case['description'] or 'No description.' }}</p>
 
-  <h2>Evidence and integrity</h2>
+  <div class="content-card">
+    <p class="desc">
+      {{ case['description'] or 'No description.' }}</p>
+  </div>
+
+
+  <h2>Evidence and Integrity</h2>
+
   {% if results %}
+
     <p class="meta">
-      Each file was rehashed when this report was generated and compared with
-      the SHA-256 recorded at upload.
+      Each file was rehashed when this report was generated and compared
+      with the SHA-256 recorded at upload.
     </p>
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th><th>File</th><th>Uploaded by</th><th>Uploaded (UTC)</th>
-          <th>Recorded SHA-256</th><th>Integrity</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for r in results %}
+
+    <div class="table-wrap">
+      <table>
+
+        <thead>
           <tr>
-            <td>{{ r['item']['id'] }}</td>
-            <td>{{ r['item']['original_name'] }}</td>
-            <td>{{ r['item']['uploader'] }}</td>
-            <td>{{ r['item']['uploaded_at'] }}</td>
-            <td><code class="hash">{{ r['item']['sha256'] }}</code></td>
+            <th>ID</th>
+            <th>File</th>
+            <th>Uploaded by</th>
+            <th>Uploaded (UTC)</th>
+            <th>Recorded SHA-256</th>
+            <th>Integrity</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {% for r in results %}
+
+          <tr>
+
             <td>
-              {% if r['ok'] %}
-                <strong class="result-pass">PASS</strong>
-              {% else %}
-                <strong class="result-fail">FAIL</strong><br>
-                {{ r['message'] }}
-              {% endif %}
+              {{ r['item']['id'] }}
             </td>
+
+            <td>
+              {{ r['item']['original_name'] }}
+            </td>
+
+            <td>
+              {{ r['item']['uploader'] }}
+            </td>
+
+            <td>
+              {{ r['item']['uploaded_at'] }}
+            </td>
+
+            <td>
+              <code class="hash">
+                {{ r['item']['sha256'] }}
+              </code>
+            </td>
+
+            <td>
+
+              {% if r['ok'] %}
+
+                <strong class="result-pass">
+                  PASS
+                </strong>
+
+              {% else %}
+
+                <strong class="result-fail">
+                  FAIL
+                </strong>
+
+                <br>
+
+                {{ r['message'] }}
+
+              {% endif %}
+
+            </td>
+
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+    </div>
+
   {% else %}
-    <p>No evidence has been uploaded to this case.</p>
+
+    <div class="empty-state">
+      No evidence has been uploaded to this case.
+    </div>
+
   {% endif %}
 
-  <h2>Chain of custody</h2>
+
+  <h2>Chain of Custody</h2>
+
   {% if history %}
-    <table>
-      <thead>
-        <tr>
-          <th>#</th><th>Time (UTC)</th><th>Evidence</th><th>User</th>
-          <th>Action</th><th>Notes</th><th>Entry hash</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for h in history %}
+
+    <div class="table-wrap">
+      <table>
+
+        <thead>
           <tr>
-            <td>{{ h['id'] }}</td>
-            <td>{{ h['timestamp'] }}</td>
-            <td>{{ h['original_name'] }}</td>
-            <td>{{ h['username'] }}</td>
-            <td>{{ h['action'] }}</td>
-            <td>{{ h['notes'] or '' }}</td>
-            <td><code class="hash">{{ h['entry_hash'] }}</code></td>
+            <th>#</th>
+            <th>Time (UTC)</th>
+            <th>Evidence</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>Notes</th>
+            <th>Entry hash</th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+
+        <tbody>
+
+          {% for h in history %}
+
+          <tr>
+
+            <td>
+              {{ h['id'] }}
+            </td>
+
+            <td>
+              {{ h['timestamp'] }}
+            </td>
+
+            <td>
+              {{ h['original_name'] }}
+            </td>
+
+            <td>
+              {{ h['username'] }}
+            </td>
+
+            <td>
+              {{ h['action'] }}
+            </td>
+
+            <td>
+              {{ h['notes'] or '' }}
+            </td>
+
+            <td>
+              <code class="hash">
+                {{ h['entry_hash'] }}
+              </code>
+            </td>
+
+          </tr>
+
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+    </div>
+
   {% else %}
-    <p>No custody entries for this case.</p>
+
+    <div class="empty-state">
+      No custody entries for this case.
+    </div>
+
   {% endif %}
 
-  <h2>Log verification</h2>
+
+  <h2>Log Verification</h2>
+
   {% if chain_ok %}
-    <p>Chain intact: {{ chain_message }}</p>
+
+    <div class="integrity-status">
+      <strong class="result-pass">Chain intact</strong>
+      <br>
+      {{ chain_message }}
+    </div>
+
   {% else %}
-    <p><strong class="result-fail">CHAIN BROKEN:</strong> {{ chain_message }}</p>
+
+    <div class="integrity-status broken">
+      <strong>CHAIN OF CUSTODY BROKEN</strong>
+      <br>
+      {{ chain_message }}
+    </div>
+
   {% endif %}
+
+
   {% if head %}
-    <p>
-      Latest entry in the custody log: #{{ head['id'] }}<br>
-      <code class="hash">{{ head['entry_hash'] }}</code>
-    </p>
-    <p class="meta">
-      Keep a copy of this hash with the printed report. If the log is ever
-      altered or its newest entries removed, the hash will no longer match the
-      database.
-    </p>
+
+    <h2>Latest Custody Log Hash</h2>
+
+    <div class="content-card">
+
+      <p>
+        Latest entry in the custody log:
+        <strong>#{{ head['id'] }}</strong>
+      </p>
+
+      <p>
+        <code class="hash">
+          {{ head['entry_hash'] }}
+        </code>
+      </p>
+
+      <p class="meta">
+        Keep a copy of this hash with the printed report.
+        If the log is ever altered or its newest entries removed,
+        the hash will no longer match the database.
+      </p>
+
+    </div>
+
   {% endif %}
+
 </div>
+
 {% endblock %}

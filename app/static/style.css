@@ -1,17 +1,131 @@
-body { font-family: system-ui, sans-serif; margin: 0; color: #222; }
+:root {
+  --primary: #1f2d3d;
+  --primary-dark: #172331;
+  --primary-light: #eaf0f5;
+
+  --text: #1f2933;
+  --muted: #667085;
+  --border: #d9e0e7;
+  --background: #f5f7fa;
+  --surface: #ffffff;
+
+  --success-bg: #e7f6ec;
+  --success-text: #176b3a;
+
+  --warning-bg: #fff7df;
+  --warning-border: #e5c76b;
+  --warning-text: #7a5a00;
+
+  --danger-bg: #fdecec;
+  --danger-text: #a32121;
+
+  --radius: 8px;
+  --shadow: 0 2px 8px rgba(16, 24, 40, 0.06);
+}
+
+/* ------------------------------
+   Base
+------------------------------ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 17px;
+}
+
+body {
+  margin: 0;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  color: var(--text);
+  background: var(--background);
+  line-height: 1.55;
+}
+
+a {
+  color: #155eef;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--text);
+  line-height: 1.25;
+}
+
+h1 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+h2 {
+  margin-top: 2rem;
+  margin-bottom: 0.8rem;
+  font-size: 1.4rem;
+  line-height: 1.3;
+}
+
+/* ------------------------------
+   Navigation
+------------------------------ */
 
 nav {
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: #1f2d3d;
+
+  min-height: 64px;
   padding: 0.8rem 1.5rem;
+
+  background: var(--primary);
+  color: #fff;
+
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
-nav a { color: #fff; text-decoration: none; }
-nav .brand { font-weight: bold; }
-nav .spacer { flex: 1; }
-nav .who { color: #cfd8e3; font-size: 0.9rem; }
-nav form.inline { display: inline; margin: 0; }
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+}
+
+nav a:hover {
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+nav .brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.2px;
+}
+
+nav .spacer {
+  flex: 1;
+}
+
+nav .who {
+  color: #cfd8e3;
+  font-size: 0.9rem;
+}
+
+nav form.inline {
+  display: inline;
+  margin: 0;
+}
+
 button.linklike {
   background: none;
   border: none;
@@ -21,53 +135,599 @@ button.linklike {
   padding: 0;
 }
 
-main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
-.flash {
-  background: #fff4ce;
-  border: 1px solid #e0c36a;
-  padding: 0.6rem;
-  margin-bottom: 1rem;
+button.linklike:hover {
+  opacity: 0.85;
 }
 
-form.card { max-width: 380px; display: grid; gap: 0.5rem; }
-form.card input { padding: 0.5rem; }
-form.card button { padding: 0.6rem; cursor: pointer; }
+/* ------------------------------
+   Main layout
+------------------------------ */
 
-table { border-collapse: collapse; width: 100%; }
-th, td { border-bottom: 1px solid #ddd; padding: 0.5rem; text-align: left; }
+main {
+  width: min(1100px, calc(100% - 2rem));
+  margin: 2rem auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.page-header p {
+  margin: 0.35rem 0 0;
+}
+
+.subtitle {
+  color: var(--muted);
+}
+
+/* ------------------------------
+   Cards
+------------------------------ */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.content-card {
+  padding: 1.25rem;
+}
+
+form.card {
+  width: min(430px, 100%);
+  display: grid;
+  gap: 0.6rem;
+  padding: 1.5rem;
+}
+
+.card-title {
+  margin-top: 0;
+}
+
+/* ------------------------------
+   Forms
+------------------------------ */
+
+form.stack {
+  width: min(620px, 100%);
+  display: grid;
+  gap: 0.65rem;
+}
+
+label {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 0.75rem 0.8rem;
+  min-height: 44px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+
+  background: #fff;
+  color: var(--text);
+
+  font: inherit;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #4f7cac;
+  box-shadow: 0 0 0 3px rgba(79, 124, 172, 0.15);
+}
+
+input[type="file"] {
+  padding: 0.5rem;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.form-help,
+.upload-note {
+  margin: 0.2rem 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* ------------------------------
+   Buttons
+------------------------------ */
+
+button,
+a.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 40px;
+  padding: 0.55rem 0.95rem;
+
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+
+  background: var(--primary);
+  color: #fff;
+
+  font: inherit;
+  font-weight: 600;
+
+  cursor: pointer;
+  text-decoration: none;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.05s ease;
+}
+
+button:hover,
+a.button:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  text-decoration: none;
+}
+
+button:active,
+a.button:active {
+  transform: translateY(1px);
+}
+
+.button-secondary {
+  background: #fff;
+  color: var(--primary);
+  border-color: #b9c4d0;
+}
+
+.button-secondary:hover {
+  background: var(--primary-light);
+  border-color: #9aaabd;
+  color: var(--primary-dark);
+}
+
+/* ------------------------------
+   Actions
+------------------------------ */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  margin: 1.25rem 0;
+}
+
+.actions form {
+  margin: 0;
+}
+
+/* ------------------------------
+   Tables
+------------------------------ */
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.8rem 0.85rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+th {
+  background: #f8fafc;
+  color: #475467;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* ------------------------------
+   Status badges
+------------------------------ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 0.25rem 0.6rem;
+
+  border-radius: 999px;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.badge.open {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.badge.closed {
+  background: #eef0f3;
+  color: #475467;
+}
+
+/* ------------------------------
+   Messages
+------------------------------ */
+
+.flash {
+  margin-bottom: 1rem;
+  padding: 0.75rem 0.9rem;
+
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  border-radius: 6px;
+
+  color: var(--warning-text);
+}
+
+/* ------------------------------
+   Metadata
+------------------------------ */
+
+.meta {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.desc {
+  max-width: 850px;
+  white-space: pre-wrap;
+  color: #344054;
+}
+
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+
+/* ------------------------------
+   Evidence / hashes
+------------------------------ */
+
+code.hash {
+  display: inline-block;
+  max-width: 100%;
+
+  padding: 0.25rem 0.4rem;
+
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+
+  color: #334155;
+
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+  font-size: 0.76rem;
+  word-break: break-all;
+}
+
+.result-pass {
+  color: var(--success-text);
+  font-weight: 700;
+}
+
+.result-fail {
+  color: var(--danger-text);
+  font-weight: 700;
+}
+
+/* ------------------------------
+   Evidence detail
+------------------------------ */
+
+.integrity-status {
+  padding: 0.9rem 1rem;
+  border-radius: 6px;
+  background: var(--success-bg);
+  border: 1px solid #b7e1c4;
+}
+
+.integrity-status.broken {
+  background: var(--danger-bg);
+  border-color: #f0b5b5;
+  color: var(--danger-text);
+}
+
+/* ------------------------------
+   Reports
+------------------------------ */
+
+.report .hash {
+  word-break: break-all;
+}
+
+.report table {
+  width: 100%;
+}
+
+.report th,
+.report td {
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+
+/* ------------------------------
+   Footer
+------------------------------ */
 
 footer {
   text-align: center;
-  color: #777;
+  color: #7a8594;
   font-size: 0.85rem;
-  margin: 3rem 0 1rem;
+  margin: 3rem 0 1.5rem;
 }
-.badge { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 4px; font-size: 0.8rem; }
-.badge.open { background: #d8f3dc; color: #1b4332; }
-.badge.closed { background: #e9ecef; color: #495057; }
-.actions { display: flex; gap: 0.75rem; align-items: center; margin: 1rem 0; }
-.actions form { margin: 0; }
-a.button, button.button {
-  background: #1f2d3d; color: #fff; padding: 0.5rem 0.9rem; border: none;
-  border-radius: 4px; text-decoration: none; cursor: pointer; font: inherit;
-}
-form.stack { max-width: 560px; display: grid; gap: 0.5rem; }
-form.stack input, form.stack textarea { padding: 0.5rem; font: inherit; }
-.meta { color: #555; font-size: 0.9rem; }
-.desc { white-space: pre-wrap; }
-code.hash { font-size: 0.75rem; word-break: break-all; }
-.upload-note { color: #555; font-size: 0.9rem; }
-.result-pass { color: #1a7f37; font-weight: bold; }
-.result-fail { color: #b42318; font-weight: bold; }
-.report .hash { word-break: break-all; }
-.report table { width: 100%; }
-.report th, .report td { overflow-wrap: anywhere; vertical-align: top; }
 
-@page { size: A4 landscape; margin: 10mm; }
-@media print { .report table { font-size: 8pt; } }
+/* ------------------------------
+   Responsive layout
+------------------------------ */
+
+@media (max-width: 720px) {
+  nav {
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    padding: 0.8rem 1rem;
+  }
+
+  nav .spacer {
+    display: none;
+  }
+
+  nav .who {
+    margin-left: auto;
+  }
+
+  main {
+    width: min(100% - 1rem, 1100px);
+    margin: 1.25rem auto;
+  }
+
+  .page-header {
+    flex-direction: column;
+  }
+
+  .table-wrap {
+    border-radius: 6px;
+  }
+
+  th,
+  td {
+    padding: 0.65rem;
+    white-space: nowrap;
+  }
+
+  .actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .actions > *,
+  .actions button,
+  .actions a.button {
+    width: 100%;
+  }
+}
+
+/* ------------------------------
+   Print styles
+------------------------------ */
+
+@page {
+  size: A4 landscape;
+  margin: 10mm;
+}
 
 @media print {
-  nav, footer, .flash, .no-print { display: none; }
-  body { background: #fff; }
-  .report tr { page-break-inside: avoid; }
+
+  nav,
+  footer,
+  .flash,
+  .no-print {
+    display: none !important;
+  }
+
+  html {
+    font-size: 10pt;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 10pt;
+    line-height: 1.35;
+  }
+
+  main {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .report {
+    width: 100%;
+    max-width: none;
+    font-size: 10pt;
+    line-height: 1.35;
+  }
+
+  .report h1 {
+    font-size: 18pt;
+    margin-bottom: 5pt;
+  }
+
+  .report h2 {
+    font-size: 13pt;
+    margin-top: 14pt;
+    margin-bottom: 6pt;
+  }
+
+  .report p {
+    font-size: 10pt;
+  }
+
+  .report .meta {
+    font-size: 9pt;
+  }
+
+  .report .content-card {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .report .table-wrap {
+    overflow: visible;
+    border: none;
+    box-shadow: none;
+  }
+
+  .report table {
+    width: 100%;
+    min-width: 0;
+    table-layout: auto;
+    font-size: 9pt;
+  }
+
+  .report th,
+  .report td {
+    padding: 5pt 4pt;
+    font-size: 9pt;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+  }
+
+  .report th {
+    font-size: 8.5pt;
+  }
+
+  .report code.hash {
+    font-size: 7.5pt;
+    line-height: 1.25;
+    word-break: break-all;
+  }
+
+  .report tr {
+    page-break-inside: avoid;
+  }
+
+  .report .badge {
+    font-size: 8pt;
+  }
+}
+
+/* ------------------------------
+   Case report
+------------------------------ */
+
+.report {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.report h1 {
+  font-size: 2.1rem;
+}
+
+.report h2 {
+  margin-top: 2rem;
+  font-size: 1.45rem;
+}
+
+.report p {
+  font-size: 1rem;
+}
+
+.report .meta {
+  font-size: 0.95rem;
+}
+
+.report .content-card {
+  padding: 1.4rem;
+}
+
+.report .table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.report table {
+  width: 100%;
+  min-width: 1050px;
+  font-size: 0.92rem;
+}
+
+.report th {
+  font-size: 0.82rem;
+  padding: 0.85rem 0.75rem;
+}
+
+.report td {
+  font-size: 0.92rem;
+  padding: 0.85rem 0.75rem;
+}
+
+.report code.hash {
+  display: block;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  word-break: break-all;
+  overflow-wrap: anywhere;
 }

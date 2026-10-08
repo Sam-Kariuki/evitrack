@@ -25,12 +25,20 @@
   </form>
 
   <h2>Chain of custody</h2>
-  {% if chain_ok %}
-    <p class="meta">Chain intact: {{ chain_message }}</p>
-  {% else %}
-    <p><strong>CHAIN BROKEN:</strong> {{ chain_message }}</p>
-  {% endif %}
-
+{% if chain_ok %}
+  <div class="integrity-status">
+    <strong class="result-pass">Chain intact</strong>
+    <br>
+    {{ chain_message }}
+  </div>
+{% else %}
+  <div class="integrity-status broken">
+    <strong>CHAIN OF CUSTODY BROKEN</strong>
+    <br>
+    {{ chain_message }}
+  </div>
+{% endif %}
+<div class="table-wrap">
   <table>
     <thead>
       <tr>
@@ -51,6 +59,7 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
   <p class="meta">Each entry's hash covers its own fields plus the previous entry's hash. Every time this page is opened, a VIEWED entry is added.</p>
 
   <p><a href="{{ url_for('cases.detail', case_id=case['id']) }}">Back to case</a></p>

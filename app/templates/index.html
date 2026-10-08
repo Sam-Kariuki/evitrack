@@ -1,10 +1,58 @@
 {% extends "base.html" %}
+
+{% block title %}EviTrack{% endblock %}
+
 {% block content %}
+
+<div class="card content-card">
+
   <h1>EviTrack</h1>
-  <p>Secure digital evidence and chain-of-custody manager.</p>
+
+  <p class="subtitle">
+    Secure digital evidence and chain-of-custody management.
+  </p>
+
+  <p>
+    EviTrack provides controlled case management, evidence storage,
+    integrity verification and auditable chain-of-custody records.
+  </p>
+
   {% if g.user %}
-    <p>Signed in as <strong>{{ g.user['username'] }}</strong>.</p>
+
+    <p>
+      Signed in as
+      <strong>{{ g.user['username'] }}</strong>.
+    </p>
+
+    <div class="actions">
+      <a
+        class="button"
+        href="{{ url_for('cases.index') }}"
+      >
+        View cases
+      </a>
+
+      <a
+        class="button button-secondary"
+        href="{{ url_for('cases.new') }}"
+      >
+        Create case
+      </a>
+    </div>
+
   {% else %}
-    <p><a href="{{ url_for('auth.login') }}">Log in</a> to continue.</p>
+
+    <div class="actions">
+      <a
+        class="button"
+        href="{{ url_for('auth.login') }}"
+      >
+        Log in
+      </a>
+    </div>
+
   {% endif %}
+
+</div>
+
 {% endblock %}
