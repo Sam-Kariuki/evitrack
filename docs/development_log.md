@@ -132,3 +132,26 @@ no download route; uploads before Step 6 have no custody entries.
 
 **Screenshots**
 `Step9_Lockout.png`, `Step9_Headers.png`
+
+## Step 10: UI polish (issue #[number])
+
+**Built**
+- New stylesheet with a consistent colour scheme (CSS variables), a sticky navigation bar that wraps on narrow screens, a content panel, and styled buttons, forms, tables and hash text.
+- Status banners: the evidence page and the case report show "Chain intact" in a green banner and "CHAIN BROKEN" in a red one, instead of plain text.
+- Flash messages are styled by outcome (success, error, information); errors use `role="alert"` so screen readers announce them.
+- Failed integrity checks are highlighted: red rows in the custody tables for `HASH_VERIFIED` entries that failed, and red rows for failing files in the report.
+- Case report summary line ("3 of 4 files passed the integrity check") above the evidence table.
+- Download and Verify integrity on the evidence page are now buttons in a wrapping action row, so they no longer run off the edge on narrow windows.
+- Accessibility basics: skip-to-content link, visible keyboard focus outline, labelled navigation, and a layout that works on phone-width screens.
+- Print rules kept: the navigation bar is hidden and the report prints in landscape.
+- 5 new tests in `tests/test_ui.py` (109 in total).
+
+**Design decisions**
+- No inline scripts or styles, so the strict Content-Security-Policy from Step 9 is unchanged and the pages still load with no CSP errors.
+- Flash message styling is chosen in `base.html` from key words in the message, so no routes had to change. This is a shortcut. A cleaner version would pass a category to `flash()` in each route, and it is noted as possible future work.
+- Failure is shown with words as well as colour (FAIL, CHAIN BROKEN), so the interface still works for colour-blind users and on black-and-white printouts.
+- Every existing class name (`card`, `stack`, `badge`, `actions`, `upload-note`) was kept, so templates that were not redesigned still render correctly.
+- Text that the tests and the report depend on ("Chain intact", "PASS", "FAIL", "hash mismatch") was left unchanged.
+
+**Screenshots**
+No new screenshots were taken for this step. The documentation step (#13) will retake the final screenshots of the finished interface.
