@@ -69,9 +69,9 @@
         Log in
       </a>
 
-      <a href="{{ url_for('auth.register') }}">
-        Register
-      </a>
+    {% if config['ALLOW_REGISTRATION'] %}
+      <a href="{{ url_for('auth.register') }}">Register</a>
+    {% endif %}
 
     {% endif %}
 

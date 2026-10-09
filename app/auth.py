@@ -3,8 +3,18 @@ import re
 import sqlite3
 
 import click
-from flask import (Blueprint, abort, flash, g, redirect, render_template,
-                   request, session, url_for)
+from flask import (
+    Blueprint,
+    abort,
+    current_app,
+    flash,
+    g,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .db import get_db
@@ -24,10 +34,13 @@ DUMMY_HASH = generate_password_hash("not-a-real-password")
 def load_logged_in_user():
     user_id = session.get("user_id")
     g.user = None
+
     if user_id is not None:
         g.user = get_db().execute(
-            "SELECT id, username, role FROM users WHERE id = ?", (user_id,)
+            "SELECT id, username, role FROM users WHERE id = ?",
+            (user_id,),
         ).fetchone()
+
         if g.user is None:
             session.clear()
 
@@ -39,6 +52,7 @@ def login_required(view):
             flash("Please log in to continue.")
             return redirect(url_for("auth.login"))
         return view(*args, **kwargs)
+
     return wrapped
 
 
@@ -49,43 +63,59 @@ def role_required(*roles):
             if g.user is None:
                 flash("Please log in to continue.")
                 return redirect(url_for("auth.login"))
+
             if g.user["role"] not in roles:
                 abort(403)
+
             return view(*args, **kwargs)
+
         return wrapped
+
     return decorator
 
 
 @bp.route("/register", methods=("GET", "POST"))
 def register():
+    if not current_app.config["ALLOW_REGISTRATION"]:
+        abort(404)
+
     if request.method == "POST":
         username = request.form.get("username", "").strip().lower()
         password = request.form.get("password", "")
         confirm = request.form.get("confirm", "")
 
         error = None
+
         if not USERNAME_RE.match(username):
-            error = "Username must be 3-30 characters: letters, numbers, underscore."
+            error = (
+                "Username must be 3-30 characters: letters, numbers, underscore."
+            )
         elif len(password) < MIN_PASSWORD_LENGTH:
-            error = f"Password must be at least {MIN_PASSWORD_LENGTH} characters."
+            error = (
+                f"Password must be at least {MIN_PASSWORD_LENGTH} characters."
+            )
         elif password != confirm:
             error = "Passwords do not match."
 
         if error is None:
             db = get_db()
+
             try:
                 db.execute(
                     "INSERT INTO users (username, password_hash) VALUES (?, ?)",
                     (username, generate_password_hash(password)),
                 )
                 db.commit()
+
             except sqlite3.IntegrityError:
                 error = "That username is already taken."
+
             else:
                 flash("Account created. Please log in.")
                 return redirect(url_for("auth.login"))
 
         flash(error)
+
     return render_template("register.html")
 
 
@@ -94,16 +124,20 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip().lower()
         password = request.form.get("password", "")
+
         db = get_db()
 
         # Checked before the password, so a correct guess made during a
         # lockout is refused too.
         if is_locked_out(db, username):
-            flash("Too many failed login attempts. Please try again in a few minutes.")
+            flash(
+                "Too many failed login attempts. Please try again in a few minutes."
+            )
             return render_template("login.html"), 429
 
         user = db.execute(
-            "SELECT * FROM users WHERE username = ?", (username,)
+            "SELECT * FROM users WHERE username = ?",
+            (username,),
         ).fetchone()
 
         if user is None:
@@ -117,10 +151,13 @@ def login():
             flash("Invalid username or password.")
         else:
             clear_failed_logins(db, username)
+
             session.clear()
             session["user_id"] = user["id"]
             session.permanent = True
+
             return redirect(url_for("index"))
+
     return render_template("login.html")
 
 
@@ -131,23 +168,48 @@ def logout():
     return redirect(url_for("index"))
 
 
+def create_account(username, password, role):
+    """Insert a user, or raise a ClickException with a readable message."""
+
+    username = username.strip().lower()
+
+    if not USERNAME_RE.match(username) or len(password) < MIN_PASSWORD_LENGTH:
+        raise click.ClickException(
+            f"Invalid username, or password shorter than "
+            f"{MIN_PASSWORD_LENGTH} characters."
+        )
+
+    db = get_db()
+
+    try:
+        db.execute(
+            "INSERT INTO users (username, password_hash, role) "
+            "VALUES (?, ?, ?)",
+            (username, generate_password_hash(password), role),
+        )
+        db.commit()
+
+    except sqlite3.IntegrityError:
+        raise click.ClickException("That username already exists.")
+
+    return username
+
+
 @click.command("create-admin")
 @click.argument("username")
 @click.password_option()
 def create_admin_command(username, password):
     """Create an administrator account."""
-    username = username.strip().lower()
-    if not USERNAME_RE.match(username) or len(password) < MIN_PASSWORD_LENGTH:
-        raise click.ClickException(
-            f"Invalid username, or password shorter than {MIN_PASSWORD_LENGTH} characters."
-        )
-    db = get_db()
-    try:
-        db.execute(
-            "INSERT INTO users (username, password_hash, role) VALUES (?, ?, 'admin')",
-            (username, generate_password_hash(password)),
-        )
-        db.commit()
-    except sqlite3.IntegrityError:
-        raise click.ClickException("That username already exists.")
-    click.echo(f"Administrator '{username}' created.")
+
+    name = create_account(username, password, "admin")
+    click.echo(f"Administrator '{name}' created.")
+
+
+@click.command("create-user")
+@click.argument("username")
+@click.password_option()
+def create_user_command(username, password):
+    """Create an investigator account."""
+
+    name = create_account(username, password, "investigator")
+    click.echo(f"Investigator '{name}' created.")
