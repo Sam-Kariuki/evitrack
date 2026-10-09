@@ -150,5 +150,29 @@ no download route; uploads before Step 6 have no custody entries.
 **Problems / lessons**
 - A second UI branch with overlapping changes conflicted with this one in four files. It was closed unmerged instead of resolving about 750 lines of CSS by hand. Lesson: check `git branch -a` and the open pull requests before starting work on files that another branch may already be changing.
 
+## Step 11: Deployment (issue #12)
+
+**Built**
+- Deployed to a free PythonAnywhere account at https://samkariuki.pythonanywhere.com, served over HTTPS.
+- `ALLOW_REGISTRATION` setting: when it is `0` the register page returns 404 and the Register links are hidden. Accounts on the live site are created with new `create-user` and `create-admin` commands run on the server.
+- `create_account()` helper shared by both commands; 5 new tests (109 in total).
+- Production `.env` on the server with its own `SECRET_KEY`, `SESSION_COOKIE_SECURE=1` and `ALLOW_REGISTRATION=0`, mode 600 and git-ignored.
+- WSGI file that imports `create_app`; no static-file mapping, so the CSS goes through Flask and gets the security headers.
+
+**Verified on the live site**
+- Response headers checked with `curl.exe -sI`: CSP, nosniff, frame denial, referrer policy, permissions policy and HSTS are present; the session cookie has `Secure`, `HttpOnly` and `SameSite=Lax`; the `Server` header shows the host's name, not the framework version.
+- Registration is closed ([404 check result]); login lockout works; a case, an upload and a report were produced on the live site, and the same file gives the same SHA-256 as on the development machine.
+
+**Design decisions**
+- PythonAnywhere was chosen because the app keeps its SQLite database and evidence files on disk and the free plan provides a persistent disk with HTTPS and no card. A host with a temporary disk would lose the database and evidence on every redeploy.
+- Registration is closed on the public site so strangers cannot create accounts and upload files.
+- The production secret key is generated on the server and is different from the development key.
+
+**Problems / lessons**
+- `base.html` was corrupted while hiding the Register links (probably by a regex find-and-replace or a format-on-save tool): 64 tests failed with a template syntax error. Recovered with `git checkout main -- app/templates`, redid the edit by hand, and turned off format-on-save for HTML. Lesson: read `git diff` on templates before running the tests.
+
+**Limits of the free plan**
+One web worker, a 100 CPU-second daily allowance, a one-month expiry that must be extended by hand, no SSH and no backups of the database or evidence files. The site holds demo data only.
+
 **Screenshots**
-`Step10_CasesPage.png`, `Step10_CaseDetails.png`, `Step10_EvidenceDetails.png`, `Step10_LoginPage.png`, `Step10_CaseReport.pdf`
+`Step11_CurlHeaders.png`, `Step11_LiveHome.png`, `Step11_LiveLockout.png`, `Step11_LiveCaseReport.pdf`
