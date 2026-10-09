@@ -14,21 +14,21 @@
   <p><code class="hash">{{ item['sha256'] }}</code></p>
 
   <h2>Actions</h2>
-  <p>
-    <a href="{{ url_for('evidence.download', case_id=case['id'], evidence_id=item['id']) }}">Download</a>
-    (the file's hash is checked first, and the download is blocked if it no longer matches)
-  </p>
-  <form method="post"
-        action="{{ url_for('evidence.verify', case_id=case['id'], evidence_id=item['id']) }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button type="submit">Verify integrity</button>
-  </form>
+  <div class="actions">
+    <a class="button" href="{{ url_for('evidence.download', case_id=case['id'], evidence_id=item['id']) }}">Download</a>
+    <form method="post"
+          action="{{ url_for('evidence.verify', case_id=case['id'], evidence_id=item['id']) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="button">Verify integrity</button>
+    </form>
+  </div>
+  <p class="meta">The file's hash is checked before every download, and the download is blocked if it no longer matches.</p>
 
   <h2>Chain of custody</h2>
   {% if chain_ok %}
-    <p class="meta">Chain intact: {{ chain_message }}</p>
+    <p class="status ok">Chain intact: {{ chain_message }}</p>
   {% else %}
-    <p><strong>CHAIN BROKEN:</strong> {{ chain_message }}</p>
+    <p class="status bad"><strong>CHAIN BROKEN:</strong> {{ chain_message }}</p>
   {% endif %}
 
   <table>
@@ -40,7 +40,7 @@
     </thead>
     <tbody>
       {% for h in history %}
-        <tr>
+        <tr{% if h['action'] == 'HASH_VERIFIED' and h['notes'] and 'FAIL' in h['notes'] %} class="row-fail"{% endif %}>
           <td>{{ h['id'] }}</td>
           <td>{{ h['timestamp'] }}</td>
           <td>{{ h['username'] }}</td>

@@ -5,7 +5,7 @@
   <h1>Case report: {{ case['title'] }}</h1>
   <p class="meta">
     Case #{{ case['id'] }} &middot;
-    Status: {{ case['status'] }} &middot;
+    Status: <span class="badge {{ case['status'] }}">{{ case['status'] }}</span> &middot;
     Owner: {{ case['owner'] }} &middot;
     Created (UTC): {{ case['created_at'] }}
   </p>
@@ -23,6 +23,10 @@
 
   <h2>Evidence and integrity</h2>
   {% if results %}
+    {% set passed = results | selectattr('ok') | list | length %}
+    <p class="status {{ 'ok' if passed == results | length else 'bad' }}">
+      {{ passed }} of {{ results | length }} files passed the integrity check.
+    </p>
     <p class="meta">
       Each file was rehashed when this report was generated and compared with
       the SHA-256 recorded at upload.
@@ -36,7 +40,7 @@
       </thead>
       <tbody>
         {% for r in results %}
-          <tr>
+          <tr{% if not r['ok'] %} class="row-fail"{% endif %}>
             <td>{{ r['item']['id'] }}</td>
             <td>{{ r['item']['original_name'] }}</td>
             <td>{{ r['item']['uploader'] }}</td>
@@ -69,7 +73,7 @@
       </thead>
       <tbody>
         {% for h in history %}
-          <tr>
+          <tr{% if h['action'] == 'HASH_VERIFIED' and h['notes'] and 'FAIL' in h['notes'] %} class="row-fail"{% endif %}>
             <td>{{ h['id'] }}</td>
             <td>{{ h['timestamp'] }}</td>
             <td>{{ h['original_name'] }}</td>
@@ -87,9 +91,9 @@
 
   <h2>Log verification</h2>
   {% if chain_ok %}
-    <p>Chain intact: {{ chain_message }}</p>
+    <p class="status ok">Chain intact: {{ chain_message }}</p>
   {% else %}
-    <p><strong class="result-fail">CHAIN BROKEN:</strong> {{ chain_message }}</p>
+    <p class="status bad"><strong>CHAIN BROKEN:</strong> {{ chain_message }}</p>
   {% endif %}
   {% if head %}
     <p>

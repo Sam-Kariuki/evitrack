@@ -8,7 +8,8 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <nav>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <nav aria-label="Main">
     <a href="{{ url_for('index') }}" class="brand">EviTrack</a>
     <span class="spacer"></span>
     {% if g.user %}
@@ -26,10 +27,17 @@
       <a href="{{ url_for('auth.register') }}">Register</a>
     {% endif %}
   </nav>
-  <main>
+  <main id="content">
     {% with messages = get_flashed_messages() %}
       {% for message in messages %}
-        <div class="flash">{{ message }}</div>
+        {% set ns = namespace(kind='info') %}
+        {% for word in ['passed', 'created', 'updated', 'uploaded', 'recorded', 'logged out'] %}
+          {% if word in message %}{% set ns.kind = 'success' %}{% endif %}
+        {% endfor %}
+        {% for word in ['failed', 'FAILED', 'Invalid', 'Too many', 'cannot', 'not allowed', 'blocked', 'taken', 'do not match', 'must be', 'Please choose', 'empty'] %}
+          {% if word in message %}{% set ns.kind = 'error' %}{% endif %}
+        {% endfor %}
+        <div class="flash {{ ns.kind }}"{% if ns.kind == 'error' %} role="alert"{% endif %}>{{ message }}</div>
       {% endfor %}
     {% endwith %}
     {% block content %}{% endblock %}
