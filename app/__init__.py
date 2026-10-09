@@ -14,6 +14,7 @@ DEFAULT_SECRET_KEY = "dev-only-change-me"
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
+
     app.config.from_mapping(
         SECRET_KEY=os.environ.get("SECRET_KEY", DEFAULT_SECRET_KEY),
         DATABASE=os.environ.get(
@@ -30,14 +31,20 @@ def create_app(test_config=None):
         PERMANENT_SESSION_LIFETIME=timedelta(
             hours=int(os.environ.get("SESSION_HOURS", "8"))
         ),
+        # Set ALLOW_REGISTRATION=0 on a public deployment and create accounts
+        # with the create-user and create-admin commands instead.
+        ALLOW_REGISTRATION=os.environ.get("ALLOW_REGISTRATION", "1") == "1",
     )
 
     if test_config:
         app.config.update(test_config)
 
     # A known secret key lets anyone forge sessions and CSRF tokens.
-    if (app.config["SECRET_KEY"] in ("", DEFAULT_SECRET_KEY)
-            and not app.testing and not app.debug):
+    if (
+        app.config["SECRET_KEY"] in ("", DEFAULT_SECRET_KEY)
+        and not app.testing
+        and not app.debug
+    ):
         raise RuntimeError(
             "SECRET_KEY is not set. Put a long random SECRET_KEY in the "
             "environment or the .env file before running outside debug mode."
@@ -49,13 +56,17 @@ def create_app(test_config=None):
     csrf.init_app(app)
 
     from . import admin, auth, cases, db, evidence, security
+
     db.init_app(app)
     security.init_app(app)
+
     app.register_blueprint(auth.bp)
     app.register_blueprint(admin.bp)
     app.register_blueprint(cases.bp)
     app.register_blueprint(evidence.bp)
+
     app.cli.add_command(auth.create_admin_command)
+    app.cli.add_command(auth.create_user_command)
 
     @app.route("/")
     def index():
@@ -71,14 +82,11 @@ def create_app(test_config=None):
 
     @app.errorhandler(413)
     def too_large(e):
-        # CSRF protection reads the request body before the user is loaded,
-        # so load the user here to keep the navigation bar correct.
         auth.load_logged_in_user()
         return render_template("413.html"), 413
 
     @app.errorhandler(500)
     def server_error(e):
-        # No stack trace or file paths are shown. Flask still logs the error.
         return render_template("500.html"), 500
 
     return app
