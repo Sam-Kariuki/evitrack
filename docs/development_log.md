@@ -132,3 +132,23 @@ no download route; uploads before Step 6 have no custody entries.
 
 **Screenshots**
 `Step9_Lockout.png`, `Step9_Headers.png`
+
+## Step 10: UI polish (issue #[number])
+
+## Step 10: UI polish (PR #23)
+
+**Built**
+- Restyled the whole interface with a new stylesheet and updated templates for every page: base layout and navigation, start page, login, register, case list, case form, case detail, evidence upload, evidence detail, case report and admin users.
+- The case page now shows the custody chain status. `cases.detail` calls `verify_chain()` and passes the result to the template, so a broken chain is visible from the case as well as from an evidence page.
+- Screenshots of the finished pages and an exported case report PDF.
+
+**Design decisions**
+- No inline scripts or styles and no external fonts, icons or CDN files, so the Content-Security-Policy from Step 9 is unchanged. A search of the templates and stylesheet for `<script`, `<style`, `style=`, `onclick=`, `|safe`, `@import`, `url(` and `http(s)://` returned nothing.
+- The wording the tests depend on was kept, and all 104 tests still pass after the redesign.
+- `verify_chain()` reads the whole custody log, and it now runs on the case page, the evidence page and the report. This is fine at the current size; with a very large log it would need caching, or checking only on the evidence page and the report.
+
+**Problems / lessons**
+- A second UI branch with overlapping changes conflicted with this one in four files. It was closed unmerged instead of resolving about 750 lines of CSS by hand. Lesson: check `git branch -a` and the open pull requests before starting work on files that another branch may already be changing.
+
+**Screenshots**
+`Step10_CasesPage.png`, `Step10_CaseDetails.png`, `Step10_EvidenceDetails.png`, `Step10_LoginPage.png`, `Step10_CaseReport.pdf`
