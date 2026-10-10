@@ -1,3 +1,5 @@
+[![CI](https://github.com/Sam-Kariuki/evitrack/actions/workflows/ci.yml/badge.svg)](https://github.com/Sam-Kariuki/evitrack/actions/workflows/ci.yml)
+
 # EviTrack
 
 A secure digital evidence and chain-of-custody manager built with
