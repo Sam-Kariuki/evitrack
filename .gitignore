@@ -6,3 +6,5 @@ instance/
 .pytest_cache/
 .vscode/
 demo-evidence/
+.coverage
+htmlcov/

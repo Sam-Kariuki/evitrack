@@ -118,3 +118,35 @@ def test_init_db_command_runs(app):
         result = runner.invoke(init_db_command)
         assert result.exit_code == 0, result.output
         assert "Initialised the database." in result.output
+
+def test_filename_that_sanitises_to_nothing_is_rejected(case_client, app):
+        resp = case_client.post(
+          "/cases/1/evidence/upload",
+          data={"file": (io.BytesIO(b"hello"), "...")},
+          content_type="multipart/form-data",
+      )
+        assert b"Invalid file name." in resp.data
+        with app.app_context():
+          count = get_db().execute("SELECT COUNT(*) AS n FROM evidence").fetchone()["n"]
+        assert count == 0
+
+def test_session_for_a_deleted_user_is_treated_as_logged_out(client):
+    with client.session_transaction() as sess:
+        sess["user_id"] = 999
+    resp = client.get("/cases/")
+    assert resp.status_code == 302
+    assert "/auth/login" in resp.headers["Location"]
+    with client.session_transaction() as sess:
+        assert "user_id" not in sess
+
+
+def test_closed_case_cannot_be_edited(case_client, app):
+    case_client.post("/cases/1/status", data={"status": "closed"})
+    assert case_client.get("/cases/1/edit").status_code == 302
+    resp = case_client.post(
+        "/cases/1/edit", data={"title": "Changed title", "description": "new"}
+    )
+    assert resp.status_code == 302
+    with app.app_context():
+        row = get_db().execute("SELECT title FROM cases WHERE id = 1").fetchone()
+    assert row["title"] == "Test case"

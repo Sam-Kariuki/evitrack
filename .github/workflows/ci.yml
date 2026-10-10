@@ -36,4 +36,4 @@ jobs:
           pip install pytest pytest-cov
 
       - name: Run tests with coverage
-        run: python -m pytest -q --cov=app --cov-report=term-missing --cov-fail-under=90
+        run: python -m pytest -q --cov=app --cov-report=term-missing --cov-fail-under=95
