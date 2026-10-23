@@ -7,3 +7,4 @@ instance/
 .vscode/
 demo-evidence/
 .coverage
+htmlcov/
