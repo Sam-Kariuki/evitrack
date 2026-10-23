@@ -176,3 +176,23 @@ One web worker, a 100 CPU-second daily allowance, a one-month expiry that must b
 
 **Screenshots**
 `Step11_CurlHeaders.png`, `Step11_LiveHome.png`, `Step11_LiveLockout.png`, `Step11_LiveCaseReport.pdf`
+
+## Step 12: Continuous integration (issue #11)
+
+**Built**
+- GitHub Actions workflow (`.github/workflows/ci.yml`) that runs on every push to `main` and every pull request.
+- A secrets check that fails the build if `.env`, a `.sqlite` file or `instance/` is tracked, or if a 64-character hex string appears in `app/` or `.env.example`. It automates the manual search that caught a real key in `.env.example` in Step 9.
+- Install of the pinned requirements, then `pytest` with coverage, failing below 95%.
+- 12 new tests (121 in total) covering failure paths: cleanup after a failed upload and after a failed file save, the invalid-filename branch, the admin redirect for visitors, a session for a deleted user, editing a closed case, and the `create-user`, `create-admin` and `init-db` commands.
+- Coverage rose from 96% to [final]%.
+
+**Design decisions**
+- The gate sits below the real figure so it catches regressions without failing on small changes.
+- CI runs on Linux while development is on Windows, so platform differences show up before deployment, which is Linux too.
+- The failed-upload test checks the guarantee from the threat model (the evidence row, the custody entry and the stored file succeed or fail together) instead of assuming it.
+
+**Problems / lessons**
+- The first coverage report showed the failure paths behind that guarantee had never been run by a test, even though they were documented as controls. Writing the tests found no bug, but the claim is now verified.
+
+**Result**
+[Add the CI run result and the date, for example "First run green on 10 October 2026".]
